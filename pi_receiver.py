@@ -6,4 +6,4 @@ ser.baudrate=9600
 
 while True:
 	read_serial=ser.readline()
-	print(read_serial)
+	print(read_serial.decode('utf-8') #decode data and print
