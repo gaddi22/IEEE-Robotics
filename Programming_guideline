@@ -1,0 +1,39 @@
+arduino:
+
+global variables:
+dowel locations
+block locations
+mothership location
+state manager
+
+
+pathing function(location) 	//finds path to location ignoring obstacles
+
+runPath function 		//executes path 
+
+map location 		//gets current location and keeps up with it
+
+map location helper	//after movement update location
+
+receive locations	//updates global variables with information from py
+
+state manager		//what info needed from pi?
+
+helper motor functions 	//runs move motor forward, sideways etc to go along path
+
+pick up block
+
+time to deposit 	//??? series of passing information back and forth
+	//mothership letters are static but orientation is random. find letter then interpret other letters 
+
+
+
+Pi:
+
+Get mothership location
+get dowel location
+get block locations
+send locations(mother, dowel, block)
+state manager				//my turn?
+determine letter			//determines letter of block
+send the 	letter				/sends letter
