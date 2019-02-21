@@ -5,5 +5,7 @@ ser = serial.Serial('/dev/ttyACM0',9600) #ls /dev/tty* replace with correct ACM 
 ser.baudrate=9600
 
 while True:
-    read_serial=ser.readline()
-    print(read_serial.decode('utf-8')) #decode data and print
+    ser.write(bytes(b'2'))
+    #print(read_serial.decode('utf-8')) #decode data and print
+    print('sending...')
+    time.sleep(1)
