@@ -14,7 +14,7 @@ int distance;
 
 void setup() {
   // put your setup code here, to run once:
-  lcd.begin(16, 1);
+  lcd.begin(16, 2);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   Serial.begin(9600);

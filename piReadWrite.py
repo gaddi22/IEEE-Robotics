@@ -14,8 +14,8 @@ ser.baudrate=9600
 
 def sendData(root):
     print('sending...')
-    ser.write(bytes(b'1'))
-    root.val = 'ard' #set arduino as active
+    ser.write(bytes(b'A'))
+    #root.val = 'ard' #set arduino as active
     time.sleep(1)
     
 def receiveData(root):
