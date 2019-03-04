@@ -6,7 +6,8 @@
 
 String root = "ard";                //sets arduino to active
 int accum = 0;                      //number of blocks picked up
-double currentCoord[] = {4, 4};     //location of robot 
+double currentCoord[] = {4, 4};     //location of robot
+int curDeg            = 0           //current Degees Robot is facing 
 char rx_byte = 0;                   //byte to be read
 double blockX[] = {3,5,2,7,2,7};
 double blockY[] = {4,5,1,3,0,6};
@@ -64,8 +65,10 @@ void findPath(int x, int y){
   delay(7000);
 }
 
+//moves robot to new angle and moves distance
 void runPath(int angle, int distance){
   rotate(angle);    //rotate angle
+  curDeg += angle   //change angle for robot
   linear(distance); //travel distance in straight line
 }
 
