@@ -39,9 +39,9 @@ void linear(int dist) // callable function for forwards and backwards movement
 void rotate(int angle)  // callable function for rotation
 {                       // number of steps may need tweaking, depends on the weight distribution; 
  //                          which will have to wait until the robot is fully built
-  if (angle >= 0) // counter-clockwise rotation
+  if (angle < 0) // counter-clockwise rotation
   {
-	for ( i = 1; i <= angle*1.72; ++i)
+	for ( i = 1; i <= -angle*1.72; ++i)
 	{
 	    FR.step(2);
 	    BR.step(2);
@@ -51,15 +51,15 @@ void rotate(int angle)  // callable function for rotation
   }
   else // clockwise
   {
-        for ( i = 1; i <= -angle*1.72; ++i)
+        for ( i = 1; i <= angle*1.72; ++i)
         {
-            FR.step(-2);
-            BR.step(-2);
-            FL.step(-2);
-            BL.step(-2);
+            FR.step(2);
+            BR.step(2);
+            FL.step(2);
+            BL.step(2);
         }  
   }
-  delay(1000);  
+    
   return;
 }
 

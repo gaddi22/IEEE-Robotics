@@ -1,3 +1,6 @@
+#include <Stepper.h>
+#include <Servo.h>
+#include <Arduino.h>
 #include <math.h>             //used for arctan function to get angle to blocks
 #include "movement.h"
 
@@ -16,8 +19,8 @@ void setup() {
   BL.setSpeed(300);
   arm.attach(9);
   pincer.attach(10); 
-  pincer.writeMicroseconds(1500);   // initial settings for motors & servos
-   // intial servo settings are for no movement. 
+  arm.write(0);   // initial settings for motors & servos
+ // pincer.write(0) // intial servo settings are for no movement. 
   //need to look more into servo settings and getting them to cooperate with the code.
   Serial.begin(9600);
 }
