@@ -35,6 +35,11 @@ void linear(int dist) // callable function for forwards and backwards movement
   }
     return;
 }
+void helper_rotate(int olddeg, int newdeg){
+  int deldeg = newdeg - olddeg;
+  rotate(deldeg);
+  return;
+}
 
 void rotate(int angle)  // callable function for rotation
 {                       // number of steps may need tweaking, depends on the weight distribution; 
