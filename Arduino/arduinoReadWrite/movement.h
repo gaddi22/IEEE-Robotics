@@ -35,13 +35,18 @@ void linear(int dist) // callable function for forwards and backwards movement
   }
     return;
 }
+void helper_rotate(int olddeg, int newdeg){
+  int deldeg = newdeg - olddeg;
+  rotate(deldeg);
+  return;
+}
 
 void rotate(int angle)  // callable function for rotation
 {                       // number of steps may need tweaking, depends on the weight distribution; 
  //                          which will have to wait until the robot is fully built
   if (angle >= 0) // counter-clockwise rotation
   {
-	for ( i = 1; i <= angle*1.72; ++i)
+	for ( i = 1; i <= angle*3.44; ++i)
 	{
 	    FR.step(2);
 	    BR.step(2);
@@ -51,7 +56,7 @@ void rotate(int angle)  // callable function for rotation
   }
   else // clockwise
   {
-        for ( i = 1; i <= -angle*1.72; ++i)
+        for ( i = 1; i <= -angle*3.44; ++i)
         {
             FR.step(-2);
             BR.step(-2);
@@ -64,33 +69,27 @@ void rotate(int angle)  // callable function for rotation
 }
 
 void Pickup_block(){  // current attempts to get the servos to do things
-    
-//  pincer.write(0);
-//  delay(54);
-//  pincer.write(95);
-  arm.write(120);
-  delay(1500);
+    int current_angle = pincer.read();
+    pincer.write(current_angle-65);
+    current_angle = current_angle-65;
+    arm.write(120);
+    delay(1500);
 
-//  pincer.write(180);
-//  delay(25);
-//  pincer.write(95);
-  arm.write(30);
-  
+    pincer.write(current_angle+30);
+    current_angle = current_angle+30;
+    arm.write(30);
   return;
 }
 
 void Deposit_block(){ //these don't really work right now, and need tweaking.
-
+  int current_angle = pincer.read();
   arm.write(90);
-  delay(1500);
-//  pincer.write(0);
-//  delayMicroseconds(8333);
-//  pincer.write(95);
-
+  delay(500);
+  pincer.write(current_angle-10);
+  current_angle = current_angle-10;
+  delay(1000);
     
-//  pincer.write(180);
-//  delayMicroseconds(37500);
-//  pincer.write(95);
+  pincer.write(current_angle+45);
   arm.write(0);
 
   return;  
