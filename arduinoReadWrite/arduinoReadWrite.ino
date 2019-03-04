@@ -10,7 +10,6 @@ double currentCoord[] = {4, 4};     //location of robot
 char rx_byte = 0;                   //byte to be read
 double blockX[] = {3,5,2,7,2,7};
 double blockY[] = {4,5,1,3,0,6};
-
 void setup() {
   // put your setup code here, to run once:
   FR.setSpeed(300);
@@ -20,7 +19,7 @@ void setup() {
   arm.attach(9);
   pincer.attach(10); 
   arm.write(0);   // initial settings for motors & servos
- // pincer.write(0) // intial servo settings are for no movement. 
+  // pincer.write(0) // intial servo settings are for no movement. 
   //need to look more into servo settings and getting them to cooperate with the code.
   Serial.begin(9600);
 }
