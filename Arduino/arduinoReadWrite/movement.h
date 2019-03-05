@@ -41,7 +41,7 @@ void rotate(int angle)  // callable function for rotation
  //                          which will have to wait until the robot is fully built
   if (angle >= 0) // counter-clockwise rotation
   {
-	for ( i = 1; i <= angle*3.44; ++i)
+	for ( i = 1; i <= angle*1.72; ++i)
 	{
 	    FR.step(2);
 	    BR.step(2);
@@ -51,7 +51,7 @@ void rotate(int angle)  // callable function for rotation
   }
   else // clockwise
   {
-        for ( i = 1; i <= -angle*3.44; ++i)
+        for ( i = 1; i <= -angle*1.72; ++i)
         {
             FR.step(-2);
             BR.step(-2);
