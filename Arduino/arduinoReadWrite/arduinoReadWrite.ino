@@ -32,11 +32,11 @@ void loop() {
   }
   else{
     //travel to all locations
-//    for(int x = 0; x < 6; x++){
-//      findPath(blockX[x], blockY[x]);
-//    }
+    for(int x = 0; x < 6; x++){
+      findPath(blockX[x], blockY[x]);
+    }
     //travels to 2,1 from 4,4
-    findPath(blockX[2], blockY[2]);
+    //findPath(blockX[2], blockY[2]);
     //sendData(accum++);
   }
 }
@@ -77,7 +77,7 @@ void runPath(int angle, int distance){
   double y = currentCoord[1];
   double rad      = degToRad(angle);            //angle in radians
   currentCoord[0] = x + sin(rad) * distance;
-  currentCoord[1] = y + cos(rad)*distance;                 //new location
+  currentCoord[1] = y + cos(rad) * distance;                 //new location
 }
 
 //gets data from raspberry pi
