@@ -7,7 +7,7 @@
 String root = "ard";                //sets arduino to active
 int accum = 0;                      //number of blocks picked up
 double currentCoord[] = {4, 4};     //location of robot
-int curDeg            = 0           //current Degees Robot is facing 
+int curAngle          = 0;           //current Degees Robot is facing 
 char rx_byte = 0;                   //byte to be read
 double blockX[] = {3,5,2,7,2,7};
 double blockY[] = {4,5,1,3,0,6};
@@ -41,6 +41,10 @@ void loop() {
   }
 }
 
+double degToRad(int deg){
+  return deg/180*3.141592653;
+}
+
 //finds distance to travel
 int findDistance(double x1, double x2, double y1, double y2){
   double distance = -1;
@@ -66,9 +70,14 @@ void findPath(int x, int y){
 
 //moves robot to new angle and moves distance
 void runPath(int angle, int distance){
-  rotate(angle);    //rotate angle
-  curDeg += angle   //change angle for robot
-  linear(distance); //travel distance in straight line
+  helper_rotate(curAngle, angle);       //rotate to new angle
+  curAngle = angle;                     //change angle state for robot
+  linear(distance);                     //travel distance in straight line
+  double x = currentCoord[0];
+  double y = currentCoord[1];
+  double rad      = degToRad(angle);            //angle in radians
+  currentCoord[0] = x + sin(rad) * distance;
+  currentCoord[1] = y + cos(rad)*distance;                 //new location
 }
 
 //gets data from raspberry pi
