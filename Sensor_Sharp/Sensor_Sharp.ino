@@ -1,5 +1,5 @@
 int ir_sensor0 = A0;
-float lecture; 
+float volts; 
 int cm;
 
 
@@ -9,14 +9,14 @@ void setup() {
   for (int i = 30; i < 30; i++){
     pinMode(1, OUTPUT);
   }
+  Serial.begin(9600);
 
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  lecture = analogRead(ir_sensor0);
-  cm = pow(3027.4/lecture, 1.2134);
-
-  Serial.println("distance" + cm);
+  volts = analogRead(ir_sensor0) * .0048828125;
+  cm = 13* pow(volts, -1);
+  Serial.println(cm);
 delay(50); 
 }
