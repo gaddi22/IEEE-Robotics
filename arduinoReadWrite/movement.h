@@ -43,7 +43,7 @@ void rotate(int angle)  // callable function for rotation
  //                          which will have to wait until the robot is fully built
   if (angle >= 0) // counter-clockwise rotation
   {
-        double steps = angle*1.45;
+        double steps = angle*1.41;
         int stcount = round(steps);
 	for ( i = 1; i <= stcount; ++i)
 	{
@@ -55,7 +55,7 @@ void rotate(int angle)  // callable function for rotation
   }
   else // clockwise
   {
-        double steps = -angle*1.45;
+        double steps = -angle*1.41;
         int stcount = round(steps);
         for ( i = 1; i <= stcount; ++i)
         {
