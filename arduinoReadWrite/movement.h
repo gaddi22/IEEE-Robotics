@@ -16,8 +16,9 @@ int i;
 void linear(int dist) // callable function for forwards and backwards movement
 {
   if (dist >= 0){ //forwards
-    int steps = dist*1.064*.5;
-    for ( i = 1; i <= steps; ++i){
+    double steps = dist*1.064*.5;
+    int stcount = round(steps);
+    for ( i = 1; i <= stcount; ++i){
       FR.step(-2);
       BR.step(-2);  //looping through the motors going 2 steps at a time
       FL.step(2);
@@ -26,7 +27,8 @@ void linear(int dist) // callable function for forwards and backwards movement
   }
   else{   // backwards
     int steps = (-dist)*1.064*.5;
-    for( i = 1; i <= steps; ++i){
+    int stcount = round(steps);
+    for( i = 1; i <= stcount; ++i){
       FR.step(2);
       BR.step(2);
       FL.step(-2);
@@ -41,7 +43,9 @@ void rotate(int angle)  // callable function for rotation
  //                          which will have to wait until the robot is fully built
   if (angle >= 0) // counter-clockwise rotation
   {
-	for ( i = 1; i <= angle*3.44; ++i)
+        double steps = angle*1.45;
+        int stcount = round(steps);
+	for ( i = 1; i <= stcount; ++i)
 	{
 	    FR.step(2);
 	    BR.step(2);
@@ -51,7 +55,9 @@ void rotate(int angle)  // callable function for rotation
   }
   else // clockwise
   {
-        for ( i = 1; i <= -angle*3.44; ++i)
+        double steps = -angle*1.45;
+        int stcount = round(steps);
+        for ( i = 1; i <= stcount; ++i)
         {
             FR.step(-2);
             BR.step(-2);
@@ -59,9 +65,10 @@ void rotate(int angle)  // callable function for rotation
             BL.step(-2);
         }  
   }
-  delay(1000);  
+  delay(500);  
   return;
 }
+
 void helper_rotate(int olddeg, int newdeg){
   int deldeg = newdeg - olddeg;
   rotate(deldeg);
