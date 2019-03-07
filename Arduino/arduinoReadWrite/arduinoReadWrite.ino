@@ -7,7 +7,7 @@
 String root = "ard";                //sets arduino to active
 int accum = 0;                      //number of blocks picked up
 double currentCoord[] = {5, 5};     //location of robot
-int curAngle          = 68;           //current Degees Robot is facing 
+double curAngle          = 0;       //current Degees Robot is facing 
 char rx_byte = 0;                   //byte to be read
 double blockX[] = {3,5,2,7,2,7};
 double blockY[] = {4,5,1,3,0,6};
@@ -72,30 +72,43 @@ double findAngle(int x, int y){
 }
 
 //finds distance to travel
-int findDistance(double x1, double x2, double y1, double y2){
+double findDistance(double x1, double x2, double y1, double y2){
   double distance = -1;
   double sqval = sq((x2-x1)) + sq((y2-y1));
   if(sqval > 0){ distance = sqrt(sqval); }
   distance = distance * 304.8;      //convert distance to millimeters
-  return ((int) distance);
+  return (distance);
+}
+
+int findSteps(double val, String type){
+  int steps = 0;
+  if(type == "distance"){
+    //find distance step qty
+  }else if(type == "angle"){
+    //find angle step qty
+  }  
+  return steps;
 }
 
 //finds path to travel to point (x,y) from currentCoord.
 //currently finds straight line
 void findPath(int x, int y){
-  angle = findAngle(x, y);
+  double angle = findAngle(x, y);
+  double dAngle = helper_rotate(curAngle, angle);     //change in angle
   Serial.print("angle");
   Serial.println(angle);
-  int distance = findDistance(currentCoord[0], x, currentCoord[1], y);
+  double distance = findDistance(currentCoord[0], x, currentCoord[1], y);
   Serial.print("distance");
   Serial.println(distance);
+  //find steps for distance and true distance travelled
+  //find steps for angle and true angle rotated
+  //run path with true values
   runPath((int) angle, distance);   //travels determined distance
   delay(7000);
 }
 
 //moves robot to new angle and moves distance
 void runPath(int angle, int distance){
-  helper_rotate(curAngle, angle);       //rotate to new angle
   curAngle = angle;                     //change angle state for robot
   linear(distance);                     //travel distance in straight line
   double x = currentCoord[0];
