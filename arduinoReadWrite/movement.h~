@@ -9,88 +9,97 @@ Stepper BL(200, 6, 7, 8, 11);
 Servo arm;
 Servo pincer;
 
-int angle = 90;
-int dist = 1219;
+int angle;
+int dist;
 int i;
+double truangle;
 
-void linear(int dist) // callable function for forwards and backwards movement
+double linear(int steps) // callable function for forwards and backwards movement
 {
-  if (dist >= 0){ //forwards
-    int steps = dist*1.064*.5;
-    for ( i = 1; i <= steps; ++i){
+//  if (dist >= 0){ //forwards
+//    double steps = dist*1.064*.5;
+//    int stcount = round(steps);
+    int iterations = steps/2;
+    for ( i = 1; i <= iterations; ++i){
       FR.step(-2);
       BR.step(-2);  //looping through the motors going 2 steps at a time
       FL.step(2);
       BL.step(2);
     }
-  }
-  else{   // backwards
-    int steps = (-dist)*1.064*.5;
-    for( i = 1; i <= steps; ++i){
-      FR.step(2);
-      BR.step(2);
-      FL.step(-2);
-      BL.step(-2);
-    }
-  }
-    return;
+//  }
+//  else{   // backwards
+//    int steps = (-dist)*1.064*.5;
+//    int stcount = round(steps);
+//    for( i = 1; i <= stcount; ++i){
+//      FR.step(2);
+//      BR.step(2);
+//      FL.step(-2);
+//      BL.step(-2);
+//    }
+//  }
+    double trudist = 2*iterations/1.064;
+    return trudist;
 }
 
-void rotate(int angle)  // callable function for rotation
+double rotate(int steps)  // callable function for rotation
 {                       // number of steps may need tweaking, depends on the weight distribution; 
  //                          which will have to wait until the robot is fully built
-  if (angle < 0) // counter-clockwise rotation
+  if (steps >= 0) 
   {
-	for ( i = 1; i <= -angle*1.72; ++i)
+  //      double steps = angle*1.41;
+        int stcount = steps/2;
+	for ( i = 1; i <= stcount; ++i)
 	{
 	    FR.step(2);
 	    BR.step(2);
 	    FL.step(2);
 	    BL.step(2);
 	}
+        double truangle = stcount/1.41;
   }
-  else // clockwise
+  else 
   {
-        for ( i = 1; i <= angle*1.72; ++i)
+   //     double steps = -angle*1.41;
+        int stcount = -steps/2;
+        for ( i = 1; i <= stcount; ++i)
         {
-            FR.step(2);
-            BR.step(2);
-            FL.step(2);
-            BL.step(2);
-        }  
-  }
-    
-  return;
+            FR.step(-2);
+            BR.step(-2);
+            FL.step(-2);
+            BL.step(-2);
+        }
+        double truangle = stcount/1.41;  
+  }  
+  return truangle;
+}
+
+double helper_rotate(double olddeg, double newdeg){
+  double deldeg = newdeg - olddeg;
+  return deldeg;
 }
 
 void Pickup_block(){  // current attempts to get the servos to do things
-    
-//  pincer.write(0);
-//  delay(54);
-//  pincer.write(95);
-  arm.write(120);
-  delay(1500);
+    int current_angle = pincer.read();
+    pincer.write(current_angle-65);
+    current_angle = current_angle-65;
+    arm.write(120);
+    delay(1500);
 
-//  pincer.write(180);
-//  delay(25);
-//  pincer.write(95);
-  arm.write(30);
-  
+    pincer.write(current_angle+30);
+    current_angle = current_angle+30;
+    arm.write(30);
   return;
 }
 
 void Deposit_block(){ //these don't really work right now, and need tweaking.
-
+  int current_angle = pincer.read();
   arm.write(90);
-  delay(1500);
-//  pincer.write(0);
-//  delayMicroseconds(8333);
-//  pincer.write(95);
-
+  delay(500);
+  pincer.write(current_angle-10);
+  current_angle = current_angle-10;
+  delay(1000);
     
-//  pincer.write(180);
-//  delayMicroseconds(37500);
-//  pincer.write(95);
+  pincer.write(current_angle+45);
   arm.write(0);
 
   return;  
