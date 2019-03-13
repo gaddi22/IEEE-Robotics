@@ -7,7 +7,7 @@
 String root = "ard";                //sets arduino to active
 int accum = 0;                      //number of blocks picked up
 double currentCoord[] = {5, 5};     //location of robot
-int curAngle          = 68;           //current Degees Robot is facing 
+double curAngle          = 0;       //current Degees Robot is facing 
 char rx_byte = 0;                   //byte to be read
 double blockX[] = {3,5,2,7,2,7};
 double blockY[] = {4,5,1,3,0,6};
@@ -52,6 +52,36 @@ bool equal(double val, double newVal){
   else{ return false; }
 }
 
+//find errors & make corrections if errors aren't within some tolerance (angle version)
+double errorA(double angle, double trudangle){    
+  double errorA = angle - trudangle;                                        
+  // need to decide on a tolerance
+  if(abs(errorA) >= 5){
+    int steps = findSteps( errorA, "angle");
+    double dangle = rotate(steps);   // may need to check the error again, but I think that wouldn't be necessary depending on the tolerance    
+    double del = errorA - dangle;
+    curAngle = curAngle - del;
+    return (trudangle + dangle);
+   }
+  else{
+    curAngle = curAngle - errorA;
+    return trudangle;
+  }
+}
+
+// distance version
+double errorD(double dist, double trudist){
+   double errorD = dist - trudist;    // might want to move the current coordinate updates into this function
+   if(abs(errorD) >= 5){              // not sure though
+     int steps = findSteps( errorD, "distance");
+     double deldist = linear(steps);
+     return deldist;
+   }
+   else {
+    return trudist; 
+   }
+}
+
 //find angle from current location to coordinate 0 is north
 double findAngle(int x, int y){
   double delX = (x-currentCoord[0]);  //change in x
@@ -72,37 +102,65 @@ double findAngle(int x, int y){
 }
 
 //finds distance to travel
-int findDistance(double x1, double x2, double y1, double y2){
+double findDistance(double x1, double x2, double y1, double y2){
   double distance = -1;
   double sqval = sq((x2-x1)) + sq((y2-y1));
   if(sqval > 0){ distance = sqrt(sqval); }
   distance = distance * 304.8;      //convert distance to millimeters
-  return ((int) distance);
+  return (distance);
+}
+
+int findSteps(double val, String type){
+  int steps = 0;
+  if(type == "distance"){
+    //find distance step qty
+    steps = (int)round(val*1.064*.5);
+  }
+  else if(type == "angle"){
+    //find angle step qty
+    steps = (int)round(val*1.41);
+
+  }  
+  return steps;
 }
 
 //finds path to travel to point (x,y) from currentCoord.
 //currently finds straight line
 void findPath(int x, int y){
-  angle = findAngle(x, y);
+  double angle = findAngle(x, y);
+  double dAngle = helper_rotate(curAngle, angle);     //change in angle
+  curAngle = angle;                     //change angle state for robot
   Serial.print("angle");
   Serial.println(angle);
-  int distance = findDistance(currentCoord[0], x, currentCoord[1], y);
+  double distance = findDistance(currentCoord[0], x, currentCoord[1], y);
   Serial.print("distance");
   Serial.println(distance);
-  runPath((int) angle, distance);   //travels determined distance
+  //find steps for distance and true distance travelled
+  //find steps for angle and true angle rotated
+  //run path with true values
+  runPath( dAngle, distance);   //travels determined distance
   delay(7000);
 }
 
 //moves robot to new angle and moves distance
-void runPath(int angle, int distance){
-  helper_rotate(curAngle, angle);       //rotate to new angle
-  curAngle = angle;                     //change angle state for robot
-  linear(distance);                     //travel distance in straight line
+void runPath(double angle, double distance){
+  
+  int steps = findSteps( angle, "angle");
+  double trudangle = rotate(steps);
+  double delangle = errorA(angle, trudangle);
+  steps = findSteps( distance, "distance");
+  double trudist = linear(steps);               //travel distance in straight line
+  double erdist = errorD(distance, trudist);	// find error, might want this as its own funtion.
+  distance = trudist + erdist;
+//  double errora = trudangle - angle;		//might want a case to do corrections if the error is too big
+//  curAngle = curAngle + errora; 				
+//  double errord = trudist - distance;		// not sure about this one atm.
+                                                    
   double x = currentCoord[0];
   double y = currentCoord[1];
   Serial.print("angle to convert: ");
   Serial.println(angle);
-  double rad      = degToRad(angle);            //angle in radians
+  double rad      = degToRad(delangle);            //angle in radians
   Serial.print("rad: ");
   Serial.println(rad);
   Serial.print("change x: ");
@@ -140,3 +198,4 @@ void sendData(int val){
   Serial.println(val);
   root = "pi"; //sets pi to active
 }
+
