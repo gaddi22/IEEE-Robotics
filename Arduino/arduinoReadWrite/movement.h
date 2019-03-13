@@ -9,58 +9,69 @@ Stepper BL(200, 6, 7, 8, 11);
 Servo arm;
 Servo pincer;
 
-int angle = 90;
-int dist = 1219;
+int angle;
+int dist;
 int i;
+double truangle;
 
-void linear(int dist) // callable function for forwards and backwards movement
+double linear(int steps) // callable function for forwards and backwards movement
 {
-  if (dist >= 0){ //forwards
-    int steps = dist*1.064*.5;
+//  if (dist >= 0){ //forwards
+//    double steps = dist*1.064*.5;
+//    int stcount = round(steps);
     for ( i = 1; i <= steps; ++i){
       FR.step(-2);
       BR.step(-2);  //looping through the motors going 2 steps at a time
       FL.step(2);
       BL.step(2);
     }
-  }
-  else{   // backwards
-    int steps = (-dist)*1.064*.5;
-    for( i = 1; i <= steps; ++i){
-      FR.step(2);
-      BR.step(2);
-      FL.step(-2);
-      BL.step(-2);
-    }
-  }
-    return;
+//  }
+//  else{   // backwards
+//    int steps = (-dist)*1.064*.5;
+//    int stcount = round(steps);
+//    for( i = 1; i <= stcount; ++i){
+//      FR.step(2);
+//      BR.step(2);
+//      FL.step(-2);
+//      BL.step(-2);
+//    }
+//  }
+    double trudist = 2*steps/1.064;
+    return trudist;
 }
 
-void rotate(int angle)  // callable function for rotation
+double rotate(int steps)  // callable function for rotation
 {                       // number of steps may need tweaking, depends on the weight distribution; 
  //                          which will have to wait until the robot is fully built
-  if (angle >= 0) // counter-clockwise rotation
+  if (steps >= 0) 
   {
-	for ( i = 1; i <= angle*1.72; ++i)
+	for ( i = 1; i <= steps; ++i)
 	{
 	    FR.step(2);
 	    BR.step(2);
 	    FL.step(2);
 	    BL.step(2);
 	}
+        
   }
-  else // clockwise
+  else 
   {
-        for ( i = 1; i <= -angle*1.72; ++i)
+        int stcount = -steps;
+        for ( i = 1; i <= stcount; ++i)
         {
             FR.step(-2);
             BR.step(-2);
             FL.step(-2);
             BL.step(-2);
-        }  
-  }
-  delay(1000);  
-  return;
+        }
+  }  
+  double truangle = steps/1.41;
+  return truangle;
+}
+
+double helper_rotate(double olddeg, double newdeg){
+  double deldeg = newdeg - olddeg;
+  return deldeg;
 }
 
 void helper_rotate(int olddeg, int newdeg){
