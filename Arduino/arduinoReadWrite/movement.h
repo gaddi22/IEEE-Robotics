@@ -14,33 +14,22 @@ int dist;
 int i;
 double truangle;
 
-double linear(int steps) // callable function for forwards and backwards movement
+double angleConversionFactor    = 2.025;
+double distanceConversionFactor = 1.064 * .5;
+
+void linear(int steps) // callable function for forwards and backwards movement
 {
-//  if (dist >= 0){ //forwards
-//    double steps = dist*1.064*.5;
-//    int stcount = round(steps);
+
     for ( i = 1; i <= steps; ++i){
       FR.step(-2);
       BR.step(-2);  //looping through the motors going 2 steps at a time
       FL.step(2);
       BL.step(2);
     }
-//  }
-//  else{   // backwards
-//    int steps = (-dist)*1.064*.5;
-//    int stcount = round(steps);
-//    for( i = 1; i <= stcount; ++i){
-//      FR.step(2);
-//      BR.step(2);
-//      FL.step(-2);
-//      BL.step(-2);
-//    }
-//  }
-    double trudist = 2*steps/1.064;
-    return trudist;
 }
 
-double rotate(int steps)  // callable function for rotation
+//steps: number of steps equals to dAngle
+void rotate(int steps)  // callable function for rotation
 {                       // number of steps may need tweaking, depends on the weight distribution; 
  //                          which will have to wait until the robot is fully built
   if (steps >= 0) 
@@ -65,19 +54,11 @@ double rotate(int steps)  // callable function for rotation
             BL.step(-2);
         }
   }  
-  double truangle = steps/1.41;
-  return truangle;
 }
 
 double helper_rotate(double olddeg, double newdeg){
   double deldeg = newdeg - olddeg;
   return deldeg;
-}
-
-void helper_rotate(int olddeg, int newdeg){
-  int deldeg = newdeg - olddeg;
-  rotate(deldeg);
-  return;
 }
 
 void Pickup_block(){  // current attempts to get the servos to do things
@@ -105,4 +86,12 @@ void Deposit_block(){ //these don't really work right now, and need tweaking.
   arm.write(0);
 
   return;  
+}
+
+double stepsToDistance(int steps){
+  return steps/distanceConversionFactor;
+}
+
+double stepsToAngle(int steps){
+  return steps/angleConversionFactor;
 }

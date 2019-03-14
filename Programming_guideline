@@ -44,3 +44,6 @@ sloke:
 	parse json with block information
 	read json file
 	come up with a way to find a mothership
+	start using sensors to detect objects//find distance to object//ir sensors
+	pass the block location data and store them into the variables
+	
