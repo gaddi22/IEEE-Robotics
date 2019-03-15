@@ -1,18 +1,17 @@
 #include <Stepper.h>
 #include <Servo.h>
 
-// setup for stepper pins & declaring servos
+//----------setup for stepper pins & declaring servos----------
 Stepper FR(200, 32, 33, 34, 35);
 Stepper FL(200, 2, 3, 4, 5);
 Stepper BR(200, 22, 23, 24, 25);
 Stepper BL(200, 6, 7, 8, 11);
-Servo arm;
-Servo pincer;
+Servo arm;        //for robot arm
+Servo pincer;     //for grabbing mecahnism for arm
 
 int angle;
 int dist;
 int i;
-double truangle;
 
 double angleConversionFactor    = 2.025;
 double distanceConversionFactor = 1.064 * .5;
@@ -94,4 +93,19 @@ double stepsToDistance(int steps){
 
 double stepsToAngle(int steps){
   return steps/angleConversionFactor;
+}
+
+//converts angle or distance to a number of corresponding steps
+int findSteps(double val, String type){
+  int steps = 0;
+  if(type == "distance"){
+    //find distance step qty
+    steps = (int)floor(val*distanceConversionFactor);
+  }
+  else if(type == "angle"){
+    //find angle step qty
+    steps = (int)round(val*angleConversionFactor);
+
+  }  
+  return steps;
 }

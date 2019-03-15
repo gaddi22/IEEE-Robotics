@@ -1,7 +1,9 @@
-int ir_sensor0 = A0;
-float volts; 
-double cm;
+//Used to find distance using IR sensors from the robot to an object
 
+//initialize IR variables
+int    ir_sensor0 = A0;
+float  volts; 
+double cm;
 double lightSensorConversionFactor = .0048828125;
 
 //returns distance to an object from bottom sensor

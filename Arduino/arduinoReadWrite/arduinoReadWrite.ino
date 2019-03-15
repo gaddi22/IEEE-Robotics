@@ -6,30 +6,29 @@
 #include "distance.h"
 
 //----------------State Manager Variables---------------
-String root = "ard";                //sets arduino to active
-int accum = 0;                      //number of blocks picked up
-double currentCoord[] = {4, 4};     //location of robot
-double curAngle          = 0;       //current Degees Robot is facing 
-char rx_byte = 0;                   //byte to be read
-double blockX[] = {3,5,2,7,2,7};
-double blockY[] = {4,5,1,3,0,6};
-
+char   msg            = 0;       //read from pi
+String root           = "ard";   //sets arduino to active
+int    accum          = 0;       //number of blocks picked up
+double curAngle       = 0;       //current Degees Robot is facing 
+double currentCoord[] = {4, 4};  //location of robot
+double blockX[] = {3,5,2,7,2,7}; //blocks' Xcoordinates
+double blockY[] = {4,5,1,3,0,6}; //blocks' Ycoordinates
+  
 void setup() {
   // put your setup code here, to run once:
-  FR.setSpeed(200);
+  FR.setSpeed(200);   //speeds for motors to operate
   FL.setSpeed(200);
   BR.setSpeed(200);
   BL.setSpeed(200);
+
   arm.attach(9);
-  pincer.attach(10); 
-  arm.write(0);   // initial settings for motors & servos
-  // pincer.write(0) // intial servo settings are for no movement. 
-  //need to look more into servo settings and getting them to cooperate with the code.
+  pincer.attach(10);
+  arm.write(0);       // initial settings for motors & servos
+  pincer.write(0)     // intial servo settings are for no movement. 
   Serial.begin(9600);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   delay(3000);
   
   //testing
@@ -137,20 +136,6 @@ double findDistance(double x1, double x2, double y1, double y2){
   return (distance);
 }
 
-int findSteps(double val, String type){
-  int steps = 0;
-  if(type == "distance"){
-    //find distance step qty
-    steps = (int)floor(val*distanceConversionFactor);
-  }
-  else if(type == "angle"){
-    //find angle step qty
-    steps = (int)round(val*angleConversionFactor);
-
-  }  
-  return steps;
-}
-
 //finds path to travel to point (x,y) from currentCoord.
 //currently finds straight line
 void findPath(int x, int y){
@@ -194,20 +179,10 @@ void updateLocation(double trueAngle, double trueDistance){
 
 //gets data from raspberry pi
 void receiveData(){
-  // put your main code here, to run repeatedly:
-  if (Serial.available() > 0) {    // is a character available?
-    rx_byte = Serial.read();       // get the character
-    root = "ard";
-    
-    // check if a number was received
-    if ((rx_byte >= '0') && (rx_byte <= '9')) {
-      Serial.print("Number received: ");
-      Serial.println(rx_byte);
-    }
-    else {
-      Serial.println("Not a number.");
-    }
-  } // end: if (Serial.available() > 0)
+  if (Serial.available() > 0) { // is a character available?
+    msg = Serial.read();        // get the character
+    Serial.println(msg);
+  }
 }
 
 void sendData(int val){
