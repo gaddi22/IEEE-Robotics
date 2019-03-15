@@ -4,21 +4,24 @@
 #include <math.h>             //used for arctan function to get angle to blocks
 #include "movement.h"
 
+
 String root = "ard";                //sets arduino to active
 int accum = 0;                      //number of blocks picked up
 double currentCoord[] = {5, 5};     //location of robot
 double curAngle          = 0;       //current Degees Robot is facing 
 char rx_byte = 0;                   //byte to be read
-double blockX[] = {3,5,2,7,2,7};
-double blockY[] = {4,5,1,3,0,6};
+
+double blockX[] = {3,5,2,7,2,7};    //data needed.
+double blockY[] = {4,5,1,3,0,6};  
+  
 void setup() {
   // put your setup code here, to run once:
-  FR.setSpeed(200);
+  FR.setSpeed(200);      //what are these? 
   FL.setSpeed(200);
   BR.setSpeed(200);
   BL.setSpeed(200);
   arm.attach(9);
-  pincer.attach(10); 
+  pincer.attach(10);     //what is pincer?
   arm.write(0);   // initial settings for motors & servos
   // pincer.write(0) // intial servo settings are for no movement. 
   //need to look more into servo settings and getting them to cooperate with the code.
@@ -140,7 +143,7 @@ void receiveData(){
     
     // check if a number was received
     if ((rx_byte >= '0') && (rx_byte <= '9')) {
-      Serial.print("Number received: ");
+      Serial.print("Number received: ");    //rx_byte is the data that I get. Is it a character? Is it an array of characters?
       Serial.println(rx_byte);
     }
     else {

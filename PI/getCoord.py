@@ -42,11 +42,11 @@ def strListTostr(str_x_list,str_y_list):
     string_x_coordinates = ''.join(str_x_list)
     string_y_coordinates = ''.join(str_y_list)
 
-    return string_x_coordinates + string_y_coordinates
+    return (string_x_coordinates, string_y_coordinates)
 
 def getCoord(): #MAIN FUNCTION IN THE SCRIPT.
     '''Takes input from the ouput of parsJson and.
-    Returns strings with x values first and y values in the end'''
+    Returns tuples of strings with x values first and y values in the end'''
 
     tuples_in_tuples = parsJson() #store output from parsJson into list_tuples.
 
@@ -61,4 +61,4 @@ def getCoord(): #MAIN FUNCTION IN THE SCRIPT.
 
 #test:
 #Sample json input: {"x coords" : [3, 5, 2, 7, 2, 7],  "y coords" : [4, 5, 1, 3, 0, 6]}
-#ouput returned when getCoord() called: 352727451306
+#ouput returned when getCoord() called: ('352727', '451306')
