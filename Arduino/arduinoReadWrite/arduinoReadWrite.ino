@@ -3,7 +3,9 @@
 #include <Arduino.h>
 #include <math.h>             //used for arctan function to get angle to blocks
 #include "movement.h"
+#include "distance.h"
 
+//----------------State Manager Variables---------------
 String root = "ard";                //sets arduino to active
 int accum = 0;                      //number of blocks picked up
 double currentCoord[] = {4, 4};     //location of robot
@@ -11,6 +13,7 @@ double curAngle          = 0;       //current Degees Robot is facing
 char rx_byte = 0;                   //byte to be read
 double blockX[] = {3,5,2,7,2,7};
 double blockY[] = {4,5,1,3,0,6};
+
 void setup() {
   // put your setup code here, to run once:
   FR.setSpeed(200);
@@ -28,6 +31,12 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   delay(3000);
+  
+  //testing
+  double distance = lowSensor();
+  logVal("Distance: ", distance);
+  
+  /*
   if(root == "pi"){
     receiveData();
   }
@@ -40,6 +49,7 @@ void loop() {
     //findPath(blockX[2], blockY[2]);
     //sendData(accum++);
   }
+  */
 }
 
 //prints value to serial monitor
