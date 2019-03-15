@@ -11,9 +11,9 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.println(analogRead(ir_sensor0));
+  //Serial.println(analogRead(ir_sensor0));
   volts = analogRead(ir_sensor0) * .0048828125;
   cm = 13* pow(volts, -1);
-  //Serial.println(cm);
+  Serial.println(cm);
 delay(50); 
 }

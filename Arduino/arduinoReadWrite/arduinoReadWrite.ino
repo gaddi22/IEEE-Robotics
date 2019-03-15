@@ -34,7 +34,11 @@ void loop() {
   
   //testing
   double distance = lowSensor();
-  logVal("Distance: ", distance);
+  if(distance > 5){
+    logVal("Distance: ", distance);
+  }else{
+    logVal("Object detected!", "");
+  }
   
   /*
   if(root == "pi"){
