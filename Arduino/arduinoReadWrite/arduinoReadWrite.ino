@@ -1,4 +1,3 @@
-#include <Stepper.h>
 #include <Servo.h>
 #include <Arduino.h>
 #include <math.h>             //used for arctan function to get angle to blocks
@@ -13,10 +12,18 @@ double blockX[] = {3,5,2,7,2,7};
 double blockY[] = {4,5,1,3,0,6};
 void setup() {
   // put your setup code here, to run once:
-  FR.setSpeed(200);
-  FL.setSpeed(200);
-  BR.setSpeed(200);
-  BL.setSpeed(200);
+  pinMode(Pulse_FL, OUTPUT);
+  pinMode(Dir_FL, OUTPUT);
+  pinMode(Pulse_FR, OUTPUT);
+  pinMode(Dir_FR, OUTPUT);
+  pinMode(Pulse_BL, OUTPUT);
+  pinMode(Dir_BL, OUTPUT);
+  pinMode(Pulse_BR, OUTPUT);
+  pinMode(Dir_BR, OUTPUT);
+  digitalWrite(Dir_FL, HIGH);
+  digitalWrite(Dir_FR, LOW);
+  digitalWrite(Dir_BL, HIGH);
+  digitalWrite(Dir_BR, LOW);
   arm.attach(9);
   pincer.attach(10); 
   arm.write(0);   // initial settings for motors & servos
