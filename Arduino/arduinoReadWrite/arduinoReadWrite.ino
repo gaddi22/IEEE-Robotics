@@ -1,4 +1,3 @@
-#include <Stepper.h>
 #include <Servo.h>
 #include <Arduino.h>
 #include <math.h>             //used for arctan function to get angle to blocks
@@ -16,11 +15,18 @@ double blockY[] = {4,5,1,3,0,6}; //blocks' Ycoordinates
   
 void setup() {
   // put your setup code here, to run once:
-  FR.setSpeed(200);   //speeds for motors to operate
-  FL.setSpeed(200);
-  BR.setSpeed(200);
-  BL.setSpeed(200);
-
+  pinMode(Pulse_FL, OUTPUT);
+  pinMode(Dir_FL, OUTPUT);
+  pinMode(Pulse_FR, OUTPUT);
+  pinMode(Dir_FR, OUTPUT);
+  pinMode(Pulse_BL, OUTPUT);
+  pinMode(Dir_BL, OUTPUT);
+  pinMode(Pulse_BR, OUTPUT);
+  pinMode(Dir_BR, OUTPUT);
+  digitalWrite(Dir_FL, HIGH);
+  digitalWrite(Dir_FR, LOW);
+  digitalWrite(Dir_BL, HIGH);
+  digitalWrite(Dir_BR, LOW);
   arm.attach(9);
   pincer.attach(10);
   arm.write(0);       // initial settings for motors & servos
@@ -54,7 +60,7 @@ void loop() {
   }
   */
 }
-
+/*
 //prints value to serial monitor
 void logVal(String msg, double val){
   Serial.println(msg + String(val));
@@ -63,6 +69,7 @@ void logVal(String msg, double val){
 void logVal(String msg, String val){
   Serial.println(msg + val);
 }
+*/
 
 String coordToString(int x, int y){
   return String(x) + ", " + String(y); 
@@ -139,9 +146,9 @@ double findDistance(double x1, double x2, double y1, double y2){
 //finds path to travel to point (x,y) from currentCoord.
 //currently finds straight line
 void findPath(int x, int y){
-  logVal("Current x-val: ", currentCoord[0]);
-  logVal("Current y-val: ", currentCoord[1]);
-  logVal("Target location: ", coordToString(x, y));
+//  logVal("Current x-val: ", currentCoord[0]);
+//  logVal("Current y-val: ", currentCoord[1]);
+//  logVal("Target location: ", coordToString(x, y));
   double targetAngle = findAngle(x, y);
   double dAngle   = helper_rotate(curAngle, targetAngle); //change in angle
   double distance = findDistance(currentCoord[0], x, currentCoord[1], y);
@@ -152,8 +159,8 @@ void findPath(int x, int y){
   double trueDistance = stepsToDistance(dSteps);
   double trueAngle    = stepsToAngle(aSteps);
 
-  logVal("trueAngle", trueAngle);
-  logVal("Steps: ", aSteps);
+//  logVal("trueAngle", trueAngle);
+//  logVal("Steps: ", aSteps);
   //logVal("trueDistance", trueDistance/304.8);
   //run path with true values
   runPath(aSteps, dSteps);   //travels determined distance
@@ -173,8 +180,8 @@ void updateLocation(double trueAngle, double trueDistance){
   //new location, convert distance to block location
   currentCoord[0] += sin(rad) * trueDistance/304.8;
   currentCoord[1] += cos(rad) * trueDistance/304.8;
-  String display = String(currentCoord[0]) + ", " + String(currentCoord[1]); 
-  logVal("New location: ", display);
+//  String display = String(currentCoord[0]) + ", " + String(currentCoord[1]); 
+//  logVal("New location: ", display);
 }
 
 //gets data from raspberry pi
