@@ -11,7 +11,13 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (Serial.available() > 0) {    // is a character available?
+<<<<<<< Updated upstream
     msg = Serial.read();       // get the character
     Serial.println(msg);
+=======
+    rx_byte = Serial.read();       // get the character
+  
+   Serial.println(rx_byte);
+    }
+>>>>>>> Stashed changes
   } // end: if (Serial.available() > 0)
-}

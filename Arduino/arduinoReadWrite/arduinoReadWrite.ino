@@ -31,6 +31,20 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   delay(3000);
+<<<<<<< Updated upstream
+=======
+  
+  //testing
+  double distance = lowSensor();
+  if(distance > 10){
+    logVal("Distance: ", distance);
+    rotate(-15);
+  }else{
+    logVal("Object detected!", "");
+  }
+  
+  /*
+>>>>>>> Stashed changes
   if(root == "pi"){
     receiveData();
   }
