@@ -26,6 +26,7 @@ pick up block
 time to deposit 	//??? series of passing information back and forth
 	//mothership letters are static but orientation is random. find letter then interpret other letters 
 
+rotate Light r sensor on a servo and make an isValid movement function to preemptively interrupt movement
 
 
 Pi:
@@ -37,3 +38,12 @@ send locations(mother, dowel, block)
 state manager				//my turn?
 determine letter			//determines letter of block
 send the 	letter				/sends letter
+
+sloke:
+	map location based on distance travelled
+	parse json with block information
+	read json file
+	come up with a way to find a mothership
+	start using sensors to detect objects//find distance to object//ir sensors
+	pass the block location data and store them into the variables
+	
