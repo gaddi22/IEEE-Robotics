@@ -3,18 +3,21 @@
 #include <math.h>             //used for arctan function to get angle to blocks
 #include "movement.h"
 #include "distance.h"
+#include "arm.h"
 
 //----------------State Manager Variables---------------
-char   msg            = 0;       //read from pi
-String root           = "ard";   //sets arduino to active
-int    accum          = 0;       //number of blocks picked up
-double curAngle       = 0;       //current Degees Robot is facing 
-double currentCoord[] = {4, 4};  //location of robot
-double blockX[] = {3,5,2,7,2,7}; //blocks' Xcoordinates
-double blockY[] = {4,5,1,3,0,6}; //blocks' Ycoordinates
-  
+char   msg            = 0;          //read from pi
+String root           = "ard";      //sets arduino to active
+int    accum          = 0;          //number of blocks picked up
+double curAngle       = 0;          //current Degees Robot is facing 
+double currentCoord[] = {4, 4};     //location of robot
+double blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
+double blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
+int    distanceFromArmToBlock = 11; //cm, minimum distance to pick up block
+
 void setup() {
   // put your setup code here, to run once:
+  //----------Movement setup----------
   pinMode(Pulse_FL, OUTPUT);
   pinMode(Dir_FL, OUTPUT);
   pinMode(Pulse_FR, OUTPUT);
@@ -27,23 +30,39 @@ void setup() {
   digitalWrite(Dir_FR, LOW);
   digitalWrite(Dir_BL, HIGH);
   digitalWrite(Dir_BR, LOW);
-  arm.attach(9);
-  pincer.attach(10);
-  arm.write(0);       // initial settings for motors & servos
-  pincer.write(0)     // intial servo settings are for no movement. 
+  
+  //----------Arm Setup----------
+  arm.attach(9);  // attaches the servo on pin 9 to the servo object arm
+  pincer.attach(10);  // attaches the servo on pin 10 to the servo object pincer
+  arm.write(inAngle);
+  pincer.write(inAngle);
+  
+  //----------Serial Setup----------
   Serial.begin(9600);
 }
 
 void loop() {
-  delay(3000);
+  delay(1000);
   
   //testing
+  //linear(10);
   double distance = lowSensor();
-  if(distance > 5){
-    logVal("Distance: ", distance);
-  }else{
-    logVal("Object detected!", "");
-  }
+  logVal("Distance: ", distance);
+//  if(distance > 20){
+//    Serial.println("object too far");
+//    rotate(-10);
+//  }else if(distance > distanceFromArmToBlock){
+//    logVal("Object detected!", "");
+//    Serial.println("Moving to object");
+//    double dtt = distance - distanceFromArmToBlock; //distance to travel
+//    int distanceSteps = findSteps(dtt, "distance");
+//    linear(distanceSteps);
+//    updateLocation(0, stepsToDistance(distanceSteps));
+//  }else{
+//    Serial.println("Picking up object");
+//    pickup();
+//    deposit();
+//  }
   
   /*
   if(root == "pi"){
@@ -60,7 +79,7 @@ void loop() {
   }
   */
 }
-/*
+
 //prints value to serial monitor
 void logVal(String msg, double val){
   Serial.println(msg + String(val));
@@ -69,7 +88,7 @@ void logVal(String msg, double val){
 void logVal(String msg, String val){
   Serial.println(msg + val);
 }
-*/
+
 
 String coordToString(int x, int y){
   return String(x) + ", " + String(y); 

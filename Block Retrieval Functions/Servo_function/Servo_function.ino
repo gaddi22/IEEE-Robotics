@@ -10,7 +10,7 @@ Servo myservo1; // servo objejct for the pincer
 #define PIN_MIN 0
 #define PIN_MAX 60
 
-int angleArm = 110;    // angle for arm servo to pickup block
+int angleArm = 97;    // angle for arm servo to pickup block
 int anglePin = 55;  // angle for the pincer servo to grab the block 
 int inAngle = 0;
 
