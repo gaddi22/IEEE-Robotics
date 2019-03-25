@@ -22,7 +22,7 @@ double distanceConversionFactor = 1.064 *4;
 
 void linear(int steps) // callable function for forwards and backwards movement
 {
-
+  if(steps>=0){
     for ( i = 0; i < steps; ++i){    //speed at 2.083 rev/s tweaking the 2nd delay can tweak the speed
       digitalWrite(Pulse_FL, HIGH);  //currently using 4 microsteps, this is being taken into account in
       digitalWrite(Pulse_FR, HIGH);  // findSteps function
@@ -35,6 +35,30 @@ void linear(int steps) // callable function for forwards and backwards movement
       digitalWrite(Pulse_BR, LOW);
       delayMicroseconds(400);
     }
+  }
+  else{                              // for going backwards if we need to.
+    digitalWrite(Dir_FL, LOW);
+    digitalWrite(Dir_FR, HIGH);
+    digitalWrite(Dir_BL, LOW);
+    digitalWrite(Dir_BR, HIGH);
+    
+    for ( i = 0; i < steps; ++i){    //speed at 2.083 rev/s tweaking the 2nd delay can tweak the speed
+      digitalWrite(Pulse_FL, HIGH);  //currently using 4 microsteps, this is being taken into account in
+      digitalWrite(Pulse_FR, HIGH);  // findSteps function
+      digitalWrite(Pulse_BL, HIGH);
+      digitalWrite(Pulse_BR, HIGH);
+      delayMicroseconds(200);
+      digitalWrite(Pulse_FL, LOW);
+      digitalWrite(Pulse_FR, LOW);
+      digitalWrite(Pulse_BL, LOW);
+      digitalWrite(Pulse_BR, LOW);
+      delayMicroseconds(400);
+    }
+    digitalWrite(Dir_FL, HIGH);
+    digitalWrite(Dir_FR, LOW);
+    digitalWrite(Dir_BL, HIGH);
+    digitalWrite(Dir_BR, LOW);
+  }
 }
 
 //steps: number of steps equals to dAngle

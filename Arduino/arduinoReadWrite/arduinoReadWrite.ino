@@ -33,8 +33,43 @@ void setup() {
 }
 
 void loop() {
+<<<<<<< Updated upstream
   // put your main code here, to run repeatedly:
   delay(3000);
+=======
+  delay(250);
+  int A = 0;
+  //testing
+  //linear(10);
+  double distance = lowSensor();
+//  logVal("Distance: ", distance);
+  if(distance > 30){
+    Serial.println("object too far");
+    rotate(-16);
+    double degree = stepsToAngle(-16);
+    double trueAngle = curAngle + degree;
+    updateLocation( trueAngle, 0);
+    A = A + 1;
+  }
+  else{
+//    logVal("Object detected!", "");
+    for(int i=0; i<19; i++){
+      distance = distance + lowSensor();
+    }
+    distance = distance/20;
+    Serial.println("Moving to object");
+    double dtt = distance - distanceFromArmToBlock; //distance to travel
+    int distanceSteps = findSteps(dtt, "distance");
+    linear(distanceSteps);
+    updateLocation(curAngle, stepsToDistance(distanceSteps));
+    delay(1000);
+    Serial.println("Picking up object");
+//    pickup();
+//    deposit();
+  }
+  
+  /*
+>>>>>>> Stashed changes
   if(root == "pi"){
     receiveData();
   }
@@ -57,6 +92,10 @@ void logVal(String msg, double val){
 void logVal(String msg, String val){
   Serial.println(msg + val);
 }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 */
 
 String coordToString(int x, int y){
