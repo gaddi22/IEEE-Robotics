@@ -1,5 +1,6 @@
 #include <Servo.h>
 
+
 // setup for stepper pins & declaring servos
 int Pulse_FL = 2;
 int Dir_FL = 3;
@@ -9,13 +10,10 @@ int Pulse_BL = 6;
 int Dir_BL = 7;
 int Pulse_BR = 8;
 int Dir_BR  = 11;
-Servo arm;
-Servo pincer;
 
 int angle;
 int dist;
 int i;
-double truangle;
 
 double angleConversionFactor    = 2.025*8;
 double distanceConversionFactor = 1.064 *4;
@@ -111,37 +109,25 @@ double helper_rotate(double olddeg, double newdeg){
   return deldeg;
 }
 
-void Pickup_block(){  // current attempts to get the servos to do things
-    int current_angle = pincer.read();
-    pincer.write(current_angle-65);
-    current_angle = current_angle-65;
-    arm.write(120);
-    delay(1500);
-
-    pincer.write(current_angle+30);
-    current_angle = current_angle+30;
-    arm.write(30);
-  return;
-}
-
-void Deposit_block(){ //these don't really work right now, and need tweaking.
-  int current_angle = pincer.read();
-  arm.write(90);
-  delay(500);
-  pincer.write(current_angle-10);
-  current_angle = current_angle-10;
-  delay(1000);
-    
-  pincer.write(current_angle+45);
-  arm.write(0);
-
-  return;  
-}
-
 double stepsToDistance(int steps){
   return steps/distanceConversionFactor;
 }
 
 double stepsToAngle(int steps){
   return steps/angleConversionFactor;
+}
+
+//converts angle or distance to a number of corresponding steps
+int findSteps(double val, String type){
+  int steps = 0;
+  if(type == "distance"){
+    //find distance step qty
+    steps = (int)floor(val*distanceConversionFactor);
+  }
+  else if(type == "angle"){
+    //find angle step qty
+    steps = (int)round(val*angleConversionFactor);
+
+  }  
+  return steps;
 }
