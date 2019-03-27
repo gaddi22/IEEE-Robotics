@@ -20,10 +20,84 @@ double distanceConversionFactor = 1.064 *4;
 
 void linear(int steps) // callable function for forwards and backwards movement
 {
-  if(steps>=0){
-    for ( i = 0; i < steps; ++i){    //speed at 2.083 rev/s tweaking the 2nd delay can tweak the speed
-      digitalWrite(Pulse_FL, HIGH);  //currently using 4 microsteps, this is being taken into account in
-      digitalWrite(Pulse_FR, HIGH);  // findSteps function
+  int j = 0; 
+  unsigned long currTime;                 // accelerates to 2.083 rev/s, or up to half the steps
+  if (steps >=0){                         // decelerates for the same amount; extra steps are done at a constant speed
+   currTime = millis();
+   while (millis() - currTime < 1000){
+    if(j< (steps/2)){
+      digitalWrite(Pulse_FL, HIGH);
+      digitalWrite(Pulse_FR, HIGH);
+      digitalWrite(Pulse_BL, HIGH);
+      digitalWrite(Pulse_BR, HIGH);
+      delayMicroseconds(200);
+      digitalWrite(Pulse_FL, LOW);
+      digitalWrite(Pulse_FR, LOW);
+      digitalWrite(Pulse_BL, LOW);
+      digitalWrite(Pulse_BR, LOW);
+      delayMicroseconds(400);
+      delayMicroseconds(1500-(1.5*(millis()-currTime)));
+      j++;
+    }
+    else{
+      break;
+    }
+   }
+   for(int i =0; i < (steps - (2*j)); i++){
+     digitalWrite(Pulse_FL, HIGH);
+     digitalWrite(Pulse_FR, HIGH);
+     digitalWrite(Pulse_BL, HIGH);
+     digitalWrite(Pulse_BR, HIGH);
+     delayMicroseconds(200);
+     digitalWrite(Pulse_FL, LOW);
+     digitalWrite(Pulse_FR, LOW);
+     digitalWrite(Pulse_BL, LOW);
+     digitalWrite(Pulse_BR, LOW);
+     delayMicroseconds(400);
+   }
+   currTime = millis();
+   for (int i = 0; i < j; i++){
+     digitalWrite(Pulse_FL, HIGH);
+     digitalWrite(Pulse_FR, HIGH);
+     digitalWrite(Pulse_BL, HIGH);
+     digitalWrite(Pulse_BR, HIGH);
+     delayMicroseconds(200);
+     digitalWrite(Pulse_FL, LOW);
+     digitalWrite(Pulse_FR, LOW);
+     digitalWrite(Pulse_BL, LOW);
+     digitalWrite(Pulse_BR, LOW);
+     delayMicroseconds(400);
+     delayMicroseconds(1.5*(millis() - currTime));
+   }
+  }
+  else{
+    digitalWrite(Dir_FL, LOW);
+    digitalWrite(Dir_FR, HIGH);
+    digitalWrite(Dir_BL, LOW);
+    digitalWrite(Dir_BR, HIGH);
+    currTime = millis();
+    while (millis() - currTime < 1000){
+      if(j< abs(steps/2)){
+        digitalWrite(Pulse_FL, HIGH);
+        digitalWrite(Pulse_FR, HIGH);
+        digitalWrite(Pulse_BL, HIGH);
+        digitalWrite(Pulse_BR, HIGH);
+        delayMicroseconds(200);
+        digitalWrite(Pulse_FL, LOW);
+        digitalWrite(Pulse_FR, LOW);
+        digitalWrite(Pulse_BL, LOW);
+        digitalWrite(Pulse_BR, LOW);
+        delayMicroseconds(400);
+        delayMicroseconds(1500-(1.5*(millis()-currTime)));
+        j++;
+      }
+      else{
+        break;
+      }
+    }
+    for(int i =0; i < (abs(steps) - (2*j)); i++){
+      digitalWrite(Pulse_FL, HIGH);
+      digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
       delayMicroseconds(200);
@@ -33,16 +107,10 @@ void linear(int steps) // callable function for forwards and backwards movement
       digitalWrite(Pulse_BR, LOW);
       delayMicroseconds(400);
     }
-  }
-  else{                              // for going backwards if we need to.
-    digitalWrite(Dir_FL, LOW);
-    digitalWrite(Dir_FR, HIGH);
-    digitalWrite(Dir_BL, LOW);
-    digitalWrite(Dir_BR, HIGH);
-    
-    for ( i = 0; i < steps; ++i){    //speed at 2.083 rev/s tweaking the 2nd delay can tweak the speed
-      digitalWrite(Pulse_FL, HIGH);  //currently using 4 microsteps, this is being taken into account in
-      digitalWrite(Pulse_FR, HIGH);  // findSteps function
+    currTime = millis();
+    for (int i = 0; i < j; i++){
+      digitalWrite(Pulse_FL, HIGH);
+      digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
       delayMicroseconds(200);
@@ -51,6 +119,7 @@ void linear(int steps) // callable function for forwards and backwards movement
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
       delayMicroseconds(400);
+      delayMicroseconds(1.5*(millis() - currTime));
     }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_FR, LOW);

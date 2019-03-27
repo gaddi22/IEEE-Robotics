@@ -122,6 +122,27 @@ void logVal(String msg, String val){
   Serial.println(msg + val);
 }
 */
+bool checkIfObstacle(double distance){      // these currently call lowSensor, they need to call the High right sensor
+  double a, b, c, theta;
+  a = distance;
+  b = 8.211;
+  c = sqrt(sq(a)+sq(b));
+  theta = asin(b/c);
+  int steps = findSteps(-theta, "angle");
+  rotate(steps);
+  double dist = highRightSensor();
+  if (dist <= 30){
+    for (int i = 0; i < 19; i++){         // might not need this loop at all
+      dist = dist + highRightSensor();  
+    }
+    dist = dist/20;
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
 
 String coordToString(int x, int y){
   return String(x) + ", " + String(y); 
@@ -186,7 +207,6 @@ double findAngle(int x, int y){
   }
 }
 // function to find block, and return the distance & update the angle.
-// currently not crosschecking for obstacles, so it will mix them up. will be returning to this.
 double findBlock(boolean NE){
   boolean found = false;          // not currently using this; may take it out, or make use of it.
   boolean firstPass = false;
@@ -227,22 +247,25 @@ double findBlock(boolean NE){
           for(int i=0; i<19; i++){
             distance = distance + lowSensor();
           }
-          distance = distance/20;  
-          double dtt = distance - distanceFromArmToBlock; //distance to travel
-          if(j<89){
-            newAngle = curAngle + stepsToAngle(j*(-16));
+          distance = distance/20;
+          bool obstacleCheck = checkIfObstacle(distance);   // check if the sensed object is an obstacle
+          if (obstacleCheck = false){  
+            double dtt = distance - distanceFromArmToBlock; //distance to travel
+            if(j<89){
+              newAngle = curAngle + stepsToAngle(j*(-16));
+            }
+            else{
+              newAngle = curAngle + stepsToAngle((j*(-16))-2);
+            }
+            updateLocation(newAngle, 0);
+            return 10*dtt;  
           }
-          else{
-            newAngle = curAngle + stepsToAngle((j*(-16))-2);
-          }
-          updateLocation(newAngle, 0);
-          return 10*dtt;  
         }
       }
-      double newAngle = curAngle + stepsToAngle((j*(-16))-2);
-      updateLocation(newAngle, 0);
-      firstPass = true;
-    }
+        double newAngle = curAngle + stepsToAngle((j*(-16))-2);
+        updateLocation(newAngle, 0);
+        firstPass = true;
+  }
   
   //  ------- For 2nd and 3rd pass:
   //  ------- Need some type of test for when we are on a square next to the edge, to limit how far we go to 6 inches (or 12 iterations of 1/2 inch)
@@ -270,16 +293,24 @@ double findBlock(boolean NE){
              j++;
          }
          else{
-           for(int i=0; i<19; i++){
-              distance = distance + lowSensor();  // this will need to be the low sensor on the left side of the robot
-           }
-           distance = distance/20;  
-           double dtt = distance - distanceFromArmToBlock; //distance to travel
            aSteps = findSteps(-90, "angle");
            rotate(aSteps);
-           deldist = stepsToDistance(j*steps);
-           updateLocation(curAngle-90, deldist);
-           return 10*dtt;
+           distance = lowSensor();
+           for(int i=0; i< 19; i++){
+              distance = distance + lowSensor();  // this will need to be the low sensor on the center of the robot
+           }
+           distance = distance/20;  
+           bool obstacleCheck = checkIfObstacle(distance);   // check if the sensed object is an obstacle
+           if (obstacleCheck = false){
+             double dtt = distance - distanceFromArmToBlock; //distance to travel
+             deldist = stepsToDistance(j*steps);
+             updateLocation(curAngle-90, deldist);
+             return 10*dtt;
+           }
+           else{
+            aSteps = findSteps(90, "angle");
+            rotate(aSteps);
+           }
         }
       }
       deldist = -stepsToDistance(j*steps);
@@ -310,16 +341,24 @@ double findBlock(boolean NE){
              j++;
          }
          else{
-           for(int i=0; i<19; i++){
-              distance = distance + lowSensor();  // this will need to be the low sensor on the right side of the robot
-           }
-           distance = distance/20;  
-           double dtt = distance - distanceFromArmToBlock; //distance to travel
            aSteps = findSteps(90, "angle");
            rotate(aSteps);
-           deldist = stepsToDistance(j*steps);
-           updateLocation(curAngle+90, deldist);
-           return 10*dtt;
+           distance = lowSensor();
+           for(int i=0; i< 19; i++){
+              distance = distance + lowSensor();  // this will need to be the low sensor on the center of the robot
+           }
+           distance = distance/20;  
+           bool obstacleCheck = checkIfObstacle(distance);   // check if the sensed object is an obstacle
+           if (obstacleCheck = false){  
+             double dtt = distance - distanceFromArmToBlock; //distance to travel
+             deldist = stepsToDistance(j*steps);
+             updateLocation(curAngle+90, deldist);
+             return 10*dtt;
+           }
+           else{
+            aSteps = findSteps(-90, "angle");
+            rotate(aSteps);
+           }
         }
       }      // this next part *shouldn't* happen
       deldist = -stepsToDistance(j*steps);
