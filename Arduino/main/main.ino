@@ -169,22 +169,17 @@ void receiveBlockData(){
   while(runBit){
     if (Serial.available() > 0) { //check if character is available.
       char val = Serial.read();
-      
       if(qty==0){ //received qty value
-        qty = int(val)%48; //size value
+        qty = int(val)%48;
         blockQty = qty;        
-      }
-      else{ 
-        
-      //received block location
+      }else{ //received block location
         if(x){ //load x values
           blockX[index++] = int(val)%48;
-          
           if(index >= qty){
             index = 0;
             x = false;
-      }
-        }else{
+          }
+        }else{ //load y values
           blockY[index++] = int(val)%48;
           if(index >= qty){
             runBit = false;

@@ -1,7 +1,12 @@
-LOCATE BLOCKS
-LOCATE DOWELS
-IDENTIFY LETTER
-LOCATE MOTHERSHIP
-IDENTIFY WHAT AREA TO DROP BLOCKS IN
-MAP ARENA INTO ARRAY AT BEGINNING OF MATCH
-PASS DATA TO PI
+find mothership
+find mothership angle
+find mothership coords
+find letter A location on mothership
+go to deposit location/angle
+
+find block in a square
+scan for objects before moving
+get pytesseract working on linux
+implement color classifier
+
+implement magnetometer
