@@ -14,6 +14,7 @@ double currentCoord[] = {4, 4};     //location of robot
 double blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
 double blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
 int    distanceFromArmToBlock = 11; //cm, minimum distance to pick up block
+bool   testCondition = true;        //used to test a single iteration
 
 void setup() {
   // put your setup code here, to run once:
@@ -42,39 +43,15 @@ void setup() {
 }
 
 void loop() {
-  delay(250);
-  int A = 0;
-  //testing
-  //linear(10);
-  double distance = lowSensor();
-//  logVal("Distance: ", distance);
-  if(distance > 30){
-    Serial.println("object too far");
-    rotate(-16);
-    double degree = stepsToAngle(-16);
-    double trueAngle = curAngle + degree;
-    updateLocation( trueAngle, 0);
-    A = A + 1;
+  delay(3000);
+  if(testCondition){
+    findBlock(false);
+    testCondition = false;
   }
-  else{
-//    logVal("Object detected!", "");
-    for(int i=0; i<19; i++){
-      distance = distance + lowSensor();
-    }
-    distance = distance/20;
-    Serial.println("Moving to object");
-    double dtt = distance - distanceFromArmToBlock; //distance to travel
-    int distanceSteps = findSteps(dtt, "distance");
-    linear(distanceSteps);
-    updateLocation(curAngle, stepsToDistance(distanceSteps));
-    delay(1000);
-    Serial.println("Picking up object");
 //    pickup();
 //    deposit();
-  }
   
   /*
-=======
   delay(1000);
   
   //testing
@@ -122,6 +99,8 @@ void logVal(String msg, String val){
   Serial.println(msg + val);
 }
 */
+
+//distance: distance to object
 bool checkIfObstacle(double distance){      // these currently call lowSensor, they need to call the High right sensor
   double a, b, c, theta;
   a = distance;
