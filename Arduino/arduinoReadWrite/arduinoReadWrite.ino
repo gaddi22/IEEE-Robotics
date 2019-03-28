@@ -14,7 +14,7 @@ double currentCoord[] = {4, 4};     //location of robot
 int    blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
 int    blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
 int    blockQty = 0;
-int    distanceFromArmToBlock = 11; //cm, minimum distance to pick up block
+double    distanceFromArmToBlock = 12; //cm, minimum distance to pick up block
 
 void setup() {
   // put your setup code here, to run once:
@@ -40,30 +40,31 @@ void setup() {
   
   //----------Serial Setup----------
   Serial.begin(9600);
+  delay(2500);
 }
 
 void loop() {
-  delay(1000);
+  delay(25);
   
   //testing
-  //linear(10);
   double distance = lowSensor();
   logVal("Distance: ", distance);
-//  if(distance > 20){
-//    Serial.println("object too far");
-//    rotate(-10);
-//  }else if(distance > distanceFromArmToBlock){
-//    logVal("Object detected!", "");
-//    Serial.println("Moving to object");
-//    double dtt = distance - distanceFromArmToBlock; //distance to travel
-//    int distanceSteps = findSteps(dtt, "distance");
-//    linear(distanceSteps);
-//    updateLocation(0, stepsToDistance(distanceSteps));
-//  }else{
-//    Serial.println("Picking up object");
-//    pickup();
-//    deposit();
-//  }
+  if(distance > 20){
+    //Serial.println("object too far");
+    rotate(-50);
+  }else if(distance > distanceFromArmToBlock){
+    //logVal("Object detected!", "");
+    //Serial.println("Moving to object");
+    double dtt = (distance - distanceFromArmToBlock)*10; //distance to travel
+    int distanceSteps = findSteps(dtt, "distance");
+    logVal("Distancesteps: ", distanceSteps);
+    linear(distanceSteps);
+    updateLocation(0, stepsToDistance(distanceSteps));
+  }else{
+    Serial.println("Picking up object");
+    pickup();
+    deposit();
+  }
   
   /*
   if(root == "pi"){
