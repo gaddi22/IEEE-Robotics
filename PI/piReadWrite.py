@@ -1,29 +1,32 @@
+#receives and sends data to the arduino
+#manages localstate for pi
 import serial
 import time
 import State
-from getCoord import getCoord
+import json, os
 
 from State import State
-
-
-coord_tuples = getCoord()
-
-blockX_str = coord_tuples[0]   #string values of x and y values
-blockY_str = coord_tuples[1]
 
 #Initialize State
 root = State()
 
 #initialize Serial Information
-#ser = serial.Serial('/dev/ttyACM0',9600) #ls /dev/tty* replace with correct ACM connection
-ser = serial.Serial('COM4',9600)
+ser = serial.Serial('/dev/ttyACM0',9600) #ls /dev/tty* replace with correct ACM connection
+#ser = serial.Serial('COM4',9600)
 ser.baudrate=9600
 
+def sendBlockData(root):
+    sendData(root.size)
+    for x in root.blockX:
+        sendData(x)
+        
+    for y in root.blockY:
+        sendData(y)
 
-def sendData(root, msg):
-    print('sending...')
+def sendData(val):
+    msg = str(val)
+    print('sending:', msg)
     ser.write(msg.encode('utf-8'))
-    root.val = 'ard' #set arduino as active
     time.sleep(1)
     
 def receiveData(root):
@@ -34,12 +37,38 @@ def receiveData(root):
         root.val = 'pi' #set pi as active
     time.sleep(1)
 
-while True:
-    if(root.val == 'pi'):
-        time.sleep(4)
-        sendData(root, blockX_str)
-        sendData(root, " ")
-        sendData(root, blockY_str)
-        root.val = "ard"
-    else:
-        receiveData(root)
+'''Parses json file and returns coordinate values as a string as a whole.'''
+def parsJson(root):    
+    '''sets ylocs, xlocs, and size to values given by json'''
+
+    
+    #path = os.getcwd() + '\\resources\\' + 'file.json' # specifing relative path. #windows
+    path = os.getcwd() + '/resources/file.json' #linux
+
+    fileObj = open(path)                #Creating a fileObject                       
+    fileReadObj = fileObj.read()        #Creating a fileReadObject
+    py_values = json.loads(fileReadObj) #py_values are dictionary values.
+
+
+    #typecasting dictionary py_values to tuple_values
+    tuple_values = tuple(py_values.values())
+    #storing x values and y values in coordinates
+    root.blockX = py_values.get("x coords")
+    root.blockY = py_values.get("y coords")
+    root.size = int(py_values.get("size"))
+    
+    fileObj.close()
+
+if __name__ == '__main__':
+    while True:
+        if(root.val == 'pi'):
+            if(root.blockDataSent == False):
+                time.sleep(4)
+                parsJson(root)
+                sendBlockData(root)
+                root.val = "ard"
+            else:
+                pass
+        else:
+            pass
+            #receiveData(root)

@@ -11,8 +11,9 @@ String root           = "ard";      //sets arduino to active
 int    accum          = 0;          //number of blocks picked up
 double curAngle       = 0;          //current Degees Robot is facing 
 double currentCoord[] = {4, 4};     //location of robot
-double blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
-double blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
+int    blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
+int    blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
+int    blockQty = 0;
 int    distanceFromArmToBlock = 11; //cm, minimum distance to pick up block
 
 void setup() {
@@ -104,36 +105,6 @@ bool equal(double val, double newVal){
   else{ return false; }
 }
 
-//find errors & make corrections if errors aren't within some tolerance (angle version)
-/*double errorA(double angle, double trudangle){    
-  double errorA = angle - trudangle;                                        
-  // need to decide on a tolerance
-  if(abs(errorA) >= 5){
-    int steps = findSteps( errorA, "angle");
-    double dangle = rotate(steps);   // may need to check the error again, but I think that wouldn't be necessary depending on the tolerance    
-    double del = errorA - dangle;
-    curAngle = curAngle - del;
-    return (trudangle + dangle);
-   }
-  else{
-    curAngle = curAngle - errorA;
-    return trudangle;
-  }
-}*/
-
-// distance version
-/*double errorD(double dist, double trudist){
-   double errorD = dist - trudist;    // might want to move the current coordinate updates into this function
-   if(abs(errorD) >= 5){              // not sure though
-     int steps = findSteps( errorD, "distance");
-     double deldist = linear(steps);
-     return deldist;
-   }
-   else {
-    return trudist; 
-   }
-}*/
-
 //find angle from current location to coordinate. 0 is north
 double findAngle(int x, int y){
   double delX = (x-currentCoord[0]);  //change in x
@@ -185,6 +156,42 @@ void findPath(int x, int y){
   runPath(aSteps, dSteps);   //travels determined distance
   updateLocation(trueAngle, trueDistance);
   delay(7000);
+}
+
+//receives data from pi and loads it into state variables
+void receiveBlockData(){
+  int qty = 0;
+  bool x = true;
+  int index = 0;
+  bool runBit = true; //continue reading data
+
+  while(runBit){
+    if (Serial.available() > 0) { //check if character is available.
+      char val = Serial.read();
+      
+      if(qty==0){ //received qty value
+        qty = int(val)%48; //size value
+        blockQty = qty;        
+      }
+      else{ 
+        
+      //received block location
+        if(x){ //load x values
+          blockX[index++] = int(val)%48;
+          
+          if(index >= qty){
+            index = 0;
+            x = false;
+      }
+        }else{
+          blockY[index++] = int(val)%48;
+          if(index >= qty){
+            runBit = false;
+          }
+        }
+      }
+    }
+  }
 }
 
 //moves robot to new angle and moves distance
