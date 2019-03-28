@@ -187,6 +187,7 @@ double stepsToAngle(int steps){
 }
 
 //converts angle or distance to a number of corresponding steps
+//val: distance in mm if type = distance
 int findSteps(double val, String type){
   int steps = 0;
   if(type == "distance"){

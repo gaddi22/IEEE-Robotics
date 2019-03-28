@@ -13,7 +13,8 @@ double curAngle       = 0;          //current Degees Robot is facing
 double currentCoord[] = {4, 4};     //location of robot
 double blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
 double blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
-int    distanceFromArmToBlock = 11; //cm, minimum distance to pick up block
+double distanceFromArmToBlock = 12; //cm, minimum distance to pick up block
+
 bool   testCondition = true;        //used to test a single iteration
 
 void setup() {
@@ -40,6 +41,7 @@ void setup() {
   
   //----------Serial Setup----------
   Serial.begin(9600);
+  delay(2500);
 }
 
 void loop() {
@@ -55,24 +57,24 @@ void loop() {
   delay(1000);
   
   //testing
-  //linear(10);
   double distance = lowSensor();
   logVal("Distance: ", distance);
-//  if(distance > 20){
-//    Serial.println("object too far");
-//    rotate(-10);
-//  }else if(distance > distanceFromArmToBlock){
-//    logVal("Object detected!", "");
-//    Serial.println("Moving to object");
-//    double dtt = distance - distanceFromArmToBlock; //distance to travel
-//    int distanceSteps = findSteps(dtt, "distance");
-//    linear(distanceSteps);
-//    updateLocation(0, stepsToDistance(distanceSteps));
-//  }else{
-//    Serial.println("Picking up object");
-//    pickup();
-//    deposit();
-//  }
+  if(distance > 20){
+    //Serial.println("object too far");
+    rotate(-50);
+  }else if(distance > distanceFromArmToBlock){
+    //logVal("Object detected!", "");
+    //Serial.println("Moving to object");
+    double dtt = (distance - distanceFromArmToBlock)*10; //distance to travel
+    int distanceSteps = findSteps(dtt, "distance");
+    logVal("Distancesteps: ", distanceSteps);
+    linear(distanceSteps);
+    updateLocation(0, stepsToDistance(distanceSteps));
+  }else{
+    Serial.println("Picking up object");
+    pickup();
+    deposit();
+  }
   
   /*
   if(root == "pi"){
@@ -136,36 +138,6 @@ bool equal(double val, double newVal){
   if(abs(val - newVal) < .0005){ return true; }
   else{ return false; }
 }
-
-//find errors & make corrections if errors aren't within some tolerance (angle version)
-/*double errorA(double angle, double trudangle){    
-  double errorA = angle - trudangle;                                        
-  // need to decide on a tolerance
-  if(abs(errorA) >= 5){
-    int steps = findSteps( errorA, "angle");
-    double dangle = rotate(steps);   // may need to check the error again, but I think that wouldn't be necessary depending on the tolerance    
-    double del = errorA - dangle;
-    curAngle = curAngle - del;
-    return (trudangle + dangle);
-   }
-  else{
-    curAngle = curAngle - errorA;
-    return trudangle;
-  }
-}*/
-
-// distance version
-/*double errorD(double dist, double trudist){
-   double errorD = dist - trudist;    // might want to move the current coordinate updates into this function
-   if(abs(errorD) >= 5){              // not sure though
-     int steps = findSteps( errorD, "distance");
-     double deldist = linear(steps);
-     return deldist;
-   }
-   else {
-    return trudist; 
-   }
-}*/
 
 //find angle from current location to coordinate. 0 is north
 double findAngle(int x, int y){
@@ -412,12 +384,45 @@ void findPath(int x, int y){
   delay(7000);
 }
 
+//receives data from pi and loads it into state variables
+void receiveBlockData(){
+  int qty = 0;
+  bool x = true;
+  int index = 0;
+  bool runBit = true; //continue reading data
+
+  while(runBit){
+    if (Serial.available() > 0) { //check if character is available.
+      char val = Serial.read();
+      if(qty==0){ //received qty value
+        qty = int(val)%48;
+        blockQty = qty;        
+      }else{ //received block location
+        if(x){ //load x values
+          blockX[index++] = int(val)%48;
+          if(index >= qty){
+            index = 0;
+            x = false;
+          }
+        }else{ //load y values
+          blockY[index++] = int(val)%48;
+          if(index >= qty){
+            runBit = false;
+          }
+        }
+      }
+    }
+  }
+}
+
 //moves robot to new angle and moves distance
 void runPath(int aSteps, int dSteps){
   rotate(aSteps); //rotate delta angle 
   linear(dSteps); //travel distance in straight line
 }
 
+//trueAngle:    angle robot rotated
+//trueDistance: distance robot moved
 void updateLocation(double trueAngle, double trueDistance){
   curAngle         = curAngle + trueAngle;
   double rad       = degToRad(trueAngle);           //angle in radians
