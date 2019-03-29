@@ -5,16 +5,7 @@
 #include "distance.h"
 #include "arm.h"
 
-//----------------State Manager Variables---------------
-char   msg            = 0;          //read from pi
-String root           = "ard";      //sets arduino to active
-int    accum          = 0;          //number of blocks picked up
-double curAngle       = 0;          //current Degees Robot is facing 
-double currentCoord[] = {4, 4};     //location of robot
-double blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
-double blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
-int    distanceFromArmToBlock = 11; //cm, minimum distance to pick up block
-bool   testCondition = true;        //used to test a single iteration
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -127,9 +118,7 @@ String coordToString(int x, int y){
   return String(x) + ", " + String(y); 
 }
 
-double degToRad(int deg){
-  return ((double) deg)/180*M_PI;
-}
+
 
 //finds if doubles are withing a threshold of each other
 bool equal(double val, double newVal){
@@ -418,15 +407,12 @@ void runPath(int aSteps, int dSteps){
   linear(dSteps); //travel distance in straight line
 }
 
-void updateLocation(double trueAngle, double trueDistance){
-  curAngle         = curAngle + trueAngle;
-  double rad       = degToRad(trueAngle);           //angle in radians
-  //new location, convert distance to block location
-  currentCoord[0] += sin(rad) * trueDistance/304.8;
-  currentCoord[1] += cos(rad) * trueDistance/304.8;
-//  String display = String(currentCoord[0]) + ", " + String(currentCoord[1]); 
-//  logVal("New location: ", display);
+void turnTo(double targetAngle){
+  double delAngle = helper_rotate(curAngle, targetAngle);
+  int steps = findSteps(delAngle, "angle");
+  rotate(steps);
 }
+
 
 //gets data from raspberry pi
 void receiveData(){

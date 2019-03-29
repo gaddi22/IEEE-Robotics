@@ -1,4 +1,14 @@
-#include <Servo.h>
+
+//----------------State Manager Variables---------------
+char   msg            = 0;          //read from pi
+String root           = "ard";      //sets arduino to active
+int    accum          = 0;          //number of blocks picked up
+double curAngle       = 0;          //current Degees Robot is facing 
+double currentCoord[] = {4, 4};     //location of robot
+double blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
+double blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
+int    distanceFromArmToBlock = 11; //cm, minimum distance to pick up block
+bool   testCondition = true;        //used to test a single iteration
 
 
 // setup for stepper pins & declaring servos
@@ -17,6 +27,48 @@ int i;
 
 double angleConversionFactor    = 2.025*8;
 double distanceConversionFactor = 1.064 *4;
+
+double helper_rotate(double olddeg, double newdeg){
+  double deldeg = newdeg - olddeg;
+  return deldeg;
+}
+
+double stepsToDistance(int steps){
+  return steps/distanceConversionFactor;
+}
+
+double stepsToAngle(int steps){
+  return steps/angleConversionFactor;
+}
+
+double degToRad(int deg){
+  return ((double) deg)/180*M_PI;
+}
+
+//converts angle or distance to a number of corresponding steps
+int findSteps(double val, String type){
+  int steps = 0;
+  if(type == "distance"){
+    //find distance step qty
+    steps = (int)floor(val*distanceConversionFactor);
+  }
+  else if(type == "angle"){
+    //find angle step qty
+    steps = (int)round(val*angleConversionFactor);
+
+  }  
+  return steps;
+}
+
+void updateLocation(double trueAngle, double trueDistance){
+  curAngle         = curAngle + trueAngle;
+  double rad       = degToRad(trueAngle);           //angle in radians
+  //new location, convert distance to block location
+  currentCoord[0] += sin(rad) * trueDistance/304.8;
+  currentCoord[1] += cos(rad) * trueDistance/304.8;
+//  String display = String(currentCoord[0]) + ", " + String(currentCoord[1]); 
+//  logVal("New location: ", display);
+}
 
 void linear(int steps) // callable function for forwards and backwards movement
 {
@@ -126,6 +178,8 @@ void linear(int steps) // callable function for forwards and backwards movement
     digitalWrite(Dir_BL, HIGH);
     digitalWrite(Dir_BR, LOW);
   }
+  double truDist = stepsToDistance(steps);
+  updateLocation(0, truDist);
 }
 
 //steps: number of steps equals to dAngle
@@ -170,33 +224,7 @@ void rotate(int steps)  // callable function for rotation
     }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_BL, HIGH);
-  }  
-}
-
-double helper_rotate(double olddeg, double newdeg){
-  double deldeg = newdeg - olddeg;
-  return deldeg;
-}
-
-double stepsToDistance(int steps){
-  return steps/distanceConversionFactor;
-}
-
-double stepsToAngle(int steps){
-  return steps/angleConversionFactor;
-}
-
-//converts angle or distance to a number of corresponding steps
-int findSteps(double val, String type){
-  int steps = 0;
-  if(type == "distance"){
-    //find distance step qty
-    steps = (int)floor(val*distanceConversionFactor);
   }
-  else if(type == "angle"){
-    //find angle step qty
-    steps = (int)round(val*angleConversionFactor);
-
-  }  
-  return steps;
+  double truAngle = stepsToAngle(steps);
+  updateLocation(truAngle, 0);  
 }
