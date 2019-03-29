@@ -201,3 +201,66 @@ int findSteps(double val, String type){
   }  
   return steps;
 }
+
+//blockNum: block we are currently searching for
+//loc:      location of block currently being searched for
+bool findBlock(int blockNum){
+  //values returned
+  int distanceToBlock = 0;
+  int angleToBlock    = 0;
+
+  //Values to solve problem
+  bool found = false;
+  int  loc[] =  { blockX[blockNum], blockY[blockNum] };
+  double angle = findAngle(loc[0], loc[1]); 
+  double angleToTurn = -90;        //left of right
+  double distanceToTravel = 1      //1 foot
+  int    directionClassifier = 1;  //NE or not? 1 means not NE
+  double distance = 0;  //distance travelled
+  if (angle > 0 && angle < 90){
+    directionClassifier = -1;
+  }
+
+  angleToTurn *= directionClassifier;
+
+  //---------------1st Pass---------------
+  turnTo(angleToTurn); //turns until it reaches angleToTurn
+  while ( newAngle > -180 && !found){
+    steps = findSteps(2, "angle");
+    rotate(-steps);
+    //update newAngle
+    found = lowSensor < 20;
+  }
+
+  if(!found){//---------------2nd Pass---------------
+    turnTo(angleToTurn);
+    while(distance < distanceToTravel && !found){
+      linear(3); //move 3 steps forwards
+      //update distance travelled
+      found = lowLeftSensor < 20;
+    }
+  }else{ 
+    angleToBlock    = curAngle;    //in deg
+    distanceToBlock = lowSensor(); //in cm
+  }
+  
+  if(!found){ //---------------3rd Pass---------------
+    linear(-distance);
+    distance = 0;
+    turnTo(-180);
+    while(distance < distanceToTravel && !found){
+      linear(3); //move 3 steps forwards
+      //update distance travelled
+      found = lowRightSensor() < 20;
+      if(found){
+        angleToBlock = -90;
+        distanceToBlock = lowRightSensor();
+      }
+    }
+  }else{
+    angleToBlock    = -180;    //in deg
+    distanceToBlock = lowLeftSensor(); //in cm
+  }
+  
+  return found;
+}
