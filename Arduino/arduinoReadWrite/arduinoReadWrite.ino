@@ -463,6 +463,68 @@ void findPath(int x, int y){
   delay(7000);
 }
 
+// funtion to rotate up to 180 degrees (90 CCW, then 90 Cw), and find the lowest distance from the lowSensor
+// also takes in optional boolean for mothership,and optional double for the change in angle, these default to false & -1 respectively
+void rotateScan(double distance, bool motherShip = false, double delAngle = -1){
+  double lowDistAngle;
+  double returnAngle = curAngle;
+  int steps = findSteps(delAngle, "angle");           // this might have to change for accuracy reasons, not sure right now
+  for(int angle = 0; angle < 90; angle++){      // turn 90 degrees CCW, scan after each degree
+    rotate(steps);
+    double dist2 = lowSensor();
+    if( dist2 < distance){                      // if the new scan is lower than the lowest scan
+      distance = dist2;                         // set the lowest scan to the current scan
+      lowDistAngle = curAngle;                  // store the angle of the lowest scan
+    }
+    else if(dist2 > distance){                  // if the distance is growing, break out & go to the next function.
+      break;
+    }
+  }
+  turnTo(returnAngle);                          // go back to the original angle
+  for(int angle = 0; angle < 90; angle++){      // loop to go 90 degrees CW, still scanning after each degree
+    rotate(-steps);
+    double dist2 = lowSensor();
+    if(dist2 < distance){
+      distance = dist2;
+      lowDistAngle = curAngle;                  // same stuff
+    }
+    else if(dist2 > distance){
+      break;
+    }
+  }
+  if(motherShip = true){                        // if this function is called with the intent to scan for the mothership, maybe do a 360 scan
+    turnTo(returnAngle-180);                    // though, not sure if this would be necessary/usefull
+    returnAngle = curAngle;
+    for(int angle = 0; angle < 90; angle++){ 
+      rotate(steps);
+      double dist2 = lowSensor();
+      if( dist2 < distance){
+        distance = dist2;
+        lowDistAngle = curAngle;    
+      }
+      else if(dist2 > distance){                // same stuff
+        break;
+      }
+    }
+    turnTo(returnAngle);
+    for(int angle = 0; angle < 90; angle++){
+      rotate(-steps);
+      double dist2 = lowSensor();
+      if(dist2 < distance){
+        distance = dist2;
+        lowDistAngle = curAngle;
+      }
+      else if(dist2 > distance){
+        break;
+      }
+    }
+  }
+  if (distance < 14){                           // rotate to the angle that had the lowest distance
+    turnTo(lowDistAngle);
+  }
+}
+
+
 //moves robot to new angle and moves distance
 void runPath(int aSteps, int dSteps){
   rotate(aSteps); //rotate delta angle 
