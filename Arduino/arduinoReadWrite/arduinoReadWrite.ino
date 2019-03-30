@@ -380,62 +380,22 @@ void findMotherShip(){
   bool found = false;
   bool orthagonal = false;
   double motherShipAngle, motherShipX, motherShipY;
-  double pathX[] = {3, 3, 5, 5, 2, 2, 6, 6, 1, 1};
-  double pathY[] = {4, 3, 3, 5, 5, 2, 2, 6, 6, 1};    // set path for squarish corkscrew
+  double pathX[] = {4, 2, 4, 6};
+  double pathY[] = {6, 4, 2, 4};    // set points for checking, if we don't find it on the first 360
   int green = rgbSensor();                          // read the rgb sensor
-  for (int i = 0; i <9; i++){
-    if (found == true){
-      break
-    }
-    double targetAngle = findAngle(pathX[i], pathY[i]);
-    turnTo(targetAngle);
-    double distance = findDistance(currentCoord[0], pathX[i], currentCoord[1], pathY[i]);
-    int dSteps = findSteps(distance, "distance");
-    int delSteps = 0;
-    while(delSteps < dSteps){
-      green = rgbSensor();
-      if (green < threshold){
-        linear(648);                // 648 ~ 6 inches, limiting forwards movement
-        delSteps = delSteps + 648;
-      }
-      else {                        // zeroing in on the mothership
-        int steps = -8;
-        for (int i = 0; i < 100; i++){
-          rotate(steps);
-          int green2 = rgbSensor();
-          if (green2 < green){
-            steps = -steps;
-          }
-          else if( green2 == green){
-            break;
-          }
-          else{
-          green = green2;
-          } 
-        }
-        distance = lowSensor();
-        distance = distance - 11;
-        steps = findSteps(distance, "distance");
-        linear(steps);
-        double distance1 = lowSensor();
-        distance = lowSensor();
-        while (distance1 <= 24.6){
-          rotate(16);
-          double distance2 = lowSensor();
-          if (distance2 >= 24.6){
-            rotate(-16);
-            double dAngle = asin(distance1/distance);
-            steps = findSteps(dAngle, "angle");
-            rotate(steps);
-          }
-          else{
-          distance1 = distance2;
-          }
-        }
-        
-      }
+  int steps = findSteps(-10, "angle");
+  for (int i = 0; i <36; i++){
+    // read the RGB sensor
+    rotate(steps);
+   // if( RGB sensor == true){
+      
     }
   }
+  double targetAngle = findAngle(pathX[i], pathY[i]);
+  turnTo(targetAngle);
+  double distance = findDistance(currentCoord[0], pathX[i], currentCoord[1], pathY[i]);
+  int dSteps = findSteps(distance, "distance");
+  int delSteps = 0;
 }
 */
 //finds path to travel to point (x,y) from currentCoord.
@@ -535,6 +495,41 @@ void turnTo(double targetAngle){
   double delAngle = helper_rotate(curAngle, targetAngle);
   int steps = findSteps(delAngle, "angle");
   rotate(steps);
+}
+
+// function to zero in on a block, to be run either in or after findBlock function
+// this attempts to aim at the center of a block, & return the shortest distance from the robot to the block.
+// hopefully to deal with angled blocks
+double zeroInOnBlock(double distance){
+  double CCWAngle, CWAngle;
+  double returnAngle = curAngle;
+  int steps = findSteps(-.5, "angle");           // this might have to change for accuracy reasons, not sure right now
+  for(int angle = 0; angle < 10; angle++){      // turn 90 degrees CCW, scan after each degree
+    rotate(steps);
+    double dist2 = lowSensor();
+    if( dist2 < distance){                      // if the new reading is lower than the lowest reading
+      distance = dist2;                         // set the lowest reading to the current reading
+    }
+    else if(dist2 > 14){                  // if the distance is growing, break out & go to the next function.
+      break;
+    }
+    CCWAngle = curAngle;
+  }
+  turnTo(returnAngle);                          // go back to the original angle
+  for(int angle = 0; angle < 10; angle++){      // loop to go 90 degrees CW, still scanning after each degree
+    rotate(-steps);
+    double dist2 = lowSensor();
+    if(dist2 < distance){
+      distance = dist2;                         // same stuff
+    }
+    else if(dist2 > 14){
+      break;
+    }
+    CWAngle = curAngle;
+  }
+  double tarAngle = (CCWAngle + CWAngle)/2;
+  turnTo(tarAngle);
+  return distance;
 }
 
 
