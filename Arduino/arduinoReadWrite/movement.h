@@ -186,6 +186,48 @@ void linear(int steps) // callable function for forwards and backwards movement
 void rotate(int steps)  // callable function for rotation
 {                       // number of steps may need tweaking, depends on the weight distribution; 
  //                          which will have to wait until the robot is fully built
+ if (steps <= 50){
+  if (steps >= 0) 
+  {
+    digitalWrite(Dir_FR, HIGH);
+    digitalWrite(Dir_BR, HIGH);
+    for ( i = 1; i <= steps; ++i)          //speed at 2.083 rev/s tweaking the 2nd delay can tweak the speed
+    {
+      digitalWrite(Pulse_FL, HIGH);       //currently using 4 microsteps, this is being taken into account in
+      digitalWrite(Pulse_FR, HIGH);       // findSteps function
+      digitalWrite(Pulse_BL, HIGH);
+      digitalWrite(Pulse_BR, HIGH);
+      delayMicroseconds(200);
+      digitalWrite(Pulse_FL, LOW);
+      digitalWrite(Pulse_FR, LOW);
+      digitalWrite(Pulse_BL, LOW);
+      digitalWrite(Pulse_BR, LOW);
+      delayMicroseconds(1000);
+    }
+    digitalWrite(Dir_FR, LOW);
+    digitalWrite(Dir_BR, LOW);   
+  }
+  else 
+  {
+    digitalWrite(Dir_FL, LOW);
+    digitalWrite(Dir_BL, LOW);
+    for(int i=0; i < abs(steps); i++){
+      digitalWrite(Pulse_FL, HIGH);
+      digitalWrite(Pulse_FR, HIGH);
+      digitalWrite(Pulse_BL, HIGH);
+      digitalWrite(Pulse_BR, HIGH);
+      delayMicroseconds(200);
+      digitalWrite(Pulse_FL, LOW);
+      digitalWrite(Pulse_FR, LOW);
+      digitalWrite(Pulse_BL, LOW);
+      digitalWrite(Pulse_BR, LOW);
+      delayMicroseconds(1000);
+    }
+    digitalWrite(Dir_FL, HIGH);
+    digitalWrite(Dir_BL, HIGH);
+  }
+ }
+ else{
   if (steps >= 0) 
   {
     digitalWrite(Dir_FR, HIGH);
@@ -225,6 +267,7 @@ void rotate(int steps)  // callable function for rotation
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_BL, HIGH);
   }
+ }
   double truAngle = stepsToAngle(steps);
   updateLocation(truAngle, 0);  
 }

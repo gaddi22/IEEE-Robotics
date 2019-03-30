@@ -119,7 +119,6 @@ String coordToString(int x, int y){
 }
 
 
-
 //finds if doubles are withing a threshold of each other
 bool equal(double val, double newVal){
   if(abs(val - newVal) < .0005){ return true; }
@@ -375,7 +374,70 @@ double findDistance(double x1, double x2, double y1, double y2){
   distance = distance * 304.8;      //convert distance to millimeters
   return (distance);
 }
-
+/*
+// function to find and store mothership data.
+void findMotherShip(){
+  bool found = false;
+  bool orthagonal = false;
+  double motherShipAngle, motherShipX, motherShipY;
+  double pathX[] = {3, 3, 5, 5, 2, 2, 6, 6, 1, 1};
+  double pathY[] = {4, 3, 3, 5, 5, 2, 2, 6, 6, 1};    // set path for squarish corkscrew
+  int green = rgbSensor();                          // read the rgb sensor
+  for (int i = 0; i <9; i++){
+    if (found == true){
+      break
+    }
+    double targetAngle = findAngle(pathX[i], pathY[i]);
+    turnTo(targetAngle);
+    double distance = findDistance(currentCoord[0], pathX[i], currentCoord[1], pathY[i]);
+    int dSteps = findSteps(distance, "distance");
+    int delSteps = 0;
+    while(delSteps < dSteps){
+      green = rgbSensor();
+      if (green < threshold){
+        linear(648);                // 648 ~ 6 inches, limiting forwards movement
+        delSteps = delSteps + 648;
+      }
+      else {                        // zeroing in on the mothership
+        int steps = -8;
+        for (int i = 0; i < 100; i++){
+          rotate(steps);
+          int green2 = rgbSensor();
+          if (green2 < green){
+            steps = -steps;
+          }
+          else if( green2 == green){
+            break;
+          }
+          else{
+          green = green2;
+          } 
+        }
+        distance = lowSensor();
+        distance = distance - 11;
+        steps = findSteps(distance, "distance");
+        linear(steps);
+        double distance1 = lowSensor();
+        distance = lowSensor();
+        while (distance1 <= 24.6){
+          rotate(16);
+          double distance2 = lowSensor();
+          if (distance2 >= 24.6){
+            rotate(-16);
+            double dAngle = asin(distance1/distance);
+            steps = findSteps(dAngle, "angle");
+            rotate(steps);
+          }
+          else{
+          distance1 = distance2;
+          }
+        }
+        
+      }
+    }
+  }
+}
+*/
 //finds path to travel to point (x,y) from currentCoord.
 //currently finds straight line
 void findPath(int x, int y){
