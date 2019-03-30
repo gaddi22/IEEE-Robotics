@@ -4,6 +4,7 @@
 #include "movement.h"
 #include "distance.h"
 #include "arm.h"
+#include "color.h"
 
 //----------------State Manager Variables---------------
 char   msg            = 0;          //read from pi
@@ -14,8 +15,8 @@ double currentCoord[] = {3, 3};     //location of robot
 int    blockQty = 0;
 double blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
 double blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
-double distanceFromArmToBlock = 11.5; //cm, minimum distance to pick up block
-
+double forwardDistanceFromArmToBlock = 12.0; //cm, minimum distance to pick up block
+double backwardDistanceFromArmToBlock = 11.0;
 bool   testCondition = true;        //used to test a single iteration
 
 void setup() {
@@ -39,6 +40,9 @@ void setup() {
   pincer.attach(10);  // attaches the servo on pin 10 to the servo object pincer
   arm.write(inAngle);
   pincer.write(inAngle);
+
+  //----------Color Senser----------
+  tcs.begin();
   
   //----------Serial Setup----------
   Serial.begin(9600);
@@ -46,23 +50,10 @@ void setup() {
 }
 
 void loop() {
-  delay(3000);
-  if(testCondition){
-    bool found = findBlock(false); //in cm
-    delay(1000);
-    if(found){
-      //logVal("Object detected!", "");
-      //Serial.println("Moving to object");
-      double distance = lowSensor();
-      double dtt = (distance - distanceFromArmToBlock)*10; //distance to travel
-      int distanceSteps = findSteps(dtt, "distance");
-      //logVal("Distancesteps: ", distanceSteps);
-      linear(distanceSteps);
-      pickup();
-      //deposit();
-    }
-    testCondition = false;
-  }
+  delay(250);
+  bool isGreen = isGreenPresent();
+  Serial.println(isGreen);
+//  /
 //    pickup();
 //    deposit();
   
@@ -296,6 +287,7 @@ bool findBlock(int blockNum){
     lowD = lowSensor(); 
     found = lowD < 14;
   }
+  
 
   if(!found){//---------------2nd Pass---------------
     turnTo(angleToTurn);

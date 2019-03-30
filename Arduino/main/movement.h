@@ -1,6 +1,5 @@
 #include <Servo.h>
 
-
 // setup for stepper pins & declaring servos
 int Pulse_FL = 2;
 int Dir_FL = 3;
@@ -15,8 +14,8 @@ int angle;
 int dist;
 int i;
 
-double angleConversionFactor    = 2.025*8;
-double distanceConversionFactor = 1.064 *4;
+double angleConversionFactor    = 2.025*32;
+double distanceConversionFactor = 1.064 *16;
 
 void linear(int steps) // callable function for forwards and backwards movement
 {
@@ -30,13 +29,13 @@ void linear(int steps) // callable function for forwards and backwards movement
       digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(200);
+      delayMicroseconds(50);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(400);
-      delayMicroseconds(1500-(1.5*(millis()-currTime)));
+      delayMicroseconds(100);
+      delayMicroseconds(375-(.375*(millis()-currTime)));
       j++;
     }
     else{
@@ -48,12 +47,12 @@ void linear(int steps) // callable function for forwards and backwards movement
      digitalWrite(Pulse_FR, HIGH);
      digitalWrite(Pulse_BL, HIGH);
      digitalWrite(Pulse_BR, HIGH);
-     delayMicroseconds(200);
+     delayMicroseconds(50);
      digitalWrite(Pulse_FL, LOW);
      digitalWrite(Pulse_FR, LOW);
      digitalWrite(Pulse_BL, LOW);
      digitalWrite(Pulse_BR, LOW);
-     delayMicroseconds(400);
+     delayMicroseconds(100);
    }
    currTime = millis();
    for (int i = 0; i < j; i++){
@@ -61,13 +60,13 @@ void linear(int steps) // callable function for forwards and backwards movement
      digitalWrite(Pulse_FR, HIGH);
      digitalWrite(Pulse_BL, HIGH);
      digitalWrite(Pulse_BR, HIGH);
-     delayMicroseconds(200);
+     delayMicroseconds(50);
      digitalWrite(Pulse_FL, LOW);
      digitalWrite(Pulse_FR, LOW);
      digitalWrite(Pulse_BL, LOW);
      digitalWrite(Pulse_BR, LOW);
-     delayMicroseconds(400);
-     delayMicroseconds(1.5*(millis() - currTime));
+     delayMicroseconds(100);
+     delayMicroseconds(.375*(millis() - currTime));
    }
   }
   else{
@@ -82,13 +81,13 @@ void linear(int steps) // callable function for forwards and backwards movement
         digitalWrite(Pulse_FR, HIGH);
         digitalWrite(Pulse_BL, HIGH);
         digitalWrite(Pulse_BR, HIGH);
-        delayMicroseconds(200);
+        delayMicroseconds(50);
         digitalWrite(Pulse_FL, LOW);
         digitalWrite(Pulse_FR, LOW);
         digitalWrite(Pulse_BL, LOW);
         digitalWrite(Pulse_BR, LOW);
-        delayMicroseconds(400);
-        delayMicroseconds(1500-(1.5*(millis()-currTime)));
+        delayMicroseconds(100);
+        delayMicroseconds(375-(.375*(millis()-currTime)));
         j++;
       }
       else{
@@ -100,12 +99,12 @@ void linear(int steps) // callable function for forwards and backwards movement
       digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(200);
+      delayMicroseconds(50);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(400);
+      delayMicroseconds(100);
     }
     currTime = millis();
     for (int i = 0; i < j; i++){
@@ -113,13 +112,13 @@ void linear(int steps) // callable function for forwards and backwards movement
       digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(200);
+      delayMicroseconds(50);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(400);
-      delayMicroseconds(1.5*(millis() - currTime));
+      delayMicroseconds(100);
+      delayMicroseconds(.375*(millis() - currTime));
     }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_FR, LOW);
@@ -132,7 +131,7 @@ void linear(int steps) // callable function for forwards and backwards movement
 void rotate(int steps)  // callable function for rotation
 {                       // number of steps may need tweaking, depends on the weight distribution; 
  //                          which will have to wait until the robot is fully built
- if (abs(steps) <= 50){
+ if (abs(steps) <= 150){
   if (steps >= 0) 
   {
     digitalWrite(Dir_FR, HIGH);
@@ -143,12 +142,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);       // findSteps function
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(200);
+      delayMicroseconds(50);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(800);
+      delayMicroseconds(600);
     }
     digitalWrite(Dir_FR, LOW);
     digitalWrite(Dir_BR, LOW);   
@@ -162,12 +161,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(200);
+      delayMicroseconds(50);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(800);
+      delayMicroseconds(600);
     }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_BL, HIGH);
@@ -184,12 +183,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);       // findSteps function
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(200);
+      delayMicroseconds(50);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(400);
+      delayMicroseconds(100);
     }
     digitalWrite(Dir_FR, LOW);
     digitalWrite(Dir_BR, LOW);   
@@ -203,12 +202,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(200);
+      delayMicroseconds(50);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(400);
+      delayMicroseconds(100);
     }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_BL, HIGH);
