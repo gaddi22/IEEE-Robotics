@@ -11,9 +11,10 @@ String root           = "ard";      //sets arduino to active
 int    accum          = 0;          //number of blocks picked up
 double curAngle       = 0;          //current Degees Robot is facing 
 double currentCoord[] = {3, 3};     //location of robot
+int    blockQty = 0;
 double blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
 double blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
-double distanceFromArmToBlock = 12; //cm, minimum distance to pick up block
+double distanceFromArmToBlock = 11.5; //cm, minimum distance to pick up block
 
 bool   testCondition = true;        //used to test a single iteration
 
@@ -47,7 +48,19 @@ void setup() {
 void loop() {
   delay(3000);
   if(testCondition){
-    findBlock(false);
+    bool found = findBlock(false); //in cm
+    delay(1000);
+    if(found){
+      //logVal("Object detected!", "");
+      //Serial.println("Moving to object");
+      double distance = lowSensor();
+      double dtt = (distance - distanceFromArmToBlock)*10; //distance to travel
+      int distanceSteps = findSteps(dtt, "distance");
+      //logVal("Distancesteps: ", distanceSteps);
+      linear(distanceSteps);
+      pickup();
+      //deposit();
+    }
     testCondition = false;
   }
 //    pickup();
@@ -157,198 +170,12 @@ double findAngle(int x, int y){
     return angle;
   }
 }
-// function to find block, and return the distance & update the angle.
-double findBlock(boolean NE){
-  boolean found = false;          // not currently using this; may take it out, or make use of it.
-  int delSteps = 0;               // j renamed to delSteps
-  int steps;
-  int aSteps;
-  double distance;
-  double deldist;
-  double dAngle;
-  double distanceToTravel;
-  double newAngle;
-  
-  
-  if (NE != true) {
-    dAngle = helper_rotate(curAngle, -90);
-    aSteps = findSteps(dAngle,"angle");
-    rotate(aSteps);
-    newAngle = stepsToAngle(aSteps);
-    updateLocation(newAngle, 0);
-  }
-  else{
-    dAngle = helper_rotate(curAngle, 90);
-    aSteps = findSteps(dAngle,"angle");
-    rotate(aSteps);
-    newAngle = stepsToAngle(aSteps);
-    updateLocation(newAngle, 0);
-  }
-  while(delSteps < findSteps(90, "angle"))      // 90 degrees is 1458 steps, doing this in increments of 9, because 1458 is divisible by 9.
-  {                                             //    next possible increment is 18, which is over 1 degree, but not sure how much we care about going in increments of less than 1 degree.
-    distance = lowSensor();                     //  could also use the constant 1458 instead of findSteps(90,"angle"), but this way gives it context for now
-    if (distance > 30)
-    {
-      rotate(-9);
-      delSteps = delSteps + 9;
-    }
-    else
-    {
-      for(int i=0; i<19; i++)
-      {
-        distance = distance + lowSensor();
-      }
-      distance = distance/20;
-      bool obstacleCheck = checkIfObstacle(distance);   // check if the sensed object is an obstacle
-      if (obstacleCheck == false)
-      {  
-        distanceToTravel = distance - distanceFromArmToBlock; //distance to travel
-        newAngle = stepsToAngle(-delSteps);
-        updateLocation(newAngle, 0);
-        found = true;
-        break;
-      }
-    }
-  }
-  newAngle = stepsToAngle(-delSteps);
-  updateLocation(newAngle, 0);
 
-
-  
-  //  ------- For 2nd and 3rd pass:
-  //  ------- Need some type of test for when we are on a square next to the edge, to limit how far we go to 6 inches (or 12 iterations of 1/2 inch)
-  //  ------- will need a separate test for each of the 2nd and third pass, something like the NE bool.
-  //  ------- at the moment this is not being taken into account.
-  //  ------- may want to check with the front low sensor again after turning.
-  if (found == false)
-  {
-    if (NE != true) 
-    {
-      dAngle = helper_rotate(curAngle, -90);
-      aSteps = findSteps(dAngle,"angle");
-      rotate(aSteps);
-      newAngle = stepsToAngle(aSteps);
-      updateLocation(newAngle, 0);
-    }
-    else
-    {
-      dAngle = helper_rotate(curAngle, 90);
-      aSteps = findSteps(dAngle,"angle");
-      rotate(aSteps);
-      newAngle = stepsToAngle(aSteps);
-      updateLocation(newAngle, 0);
-    }
-    delSteps = 0;
-    while( delSteps < 1296)        // delSteps is the step counter, for this one, while it is less than the # of steps for 1 foot
-    {                              //   this value is 1297.2288; but we're flooring it, & it is an int, so it'll be 1297.
-                                   //   subtracting 1 gives a clean iteration of 54; so new 
-      distance = lowSensor();      // this will need to be the low sensor on the left side of the robot (which we don't have set up atm)
-      if (distance > 30)
-      {
-        linear(54);
-        delSteps = delSteps + 54;
-        deldist = stepsToDistance(54);
-        updateLocation(0, deldist);
-      }
-      else
-      {
-        aSteps = findSteps(-90, "angle");
-        rotate(aSteps);
-        distance = lowSensor();
-        for(int i=0; i< 19; i++)
-        {
-           distance = distance + lowSensor();  // this will need to be the low sensor on the center of the robot
-        }
-        distance = distance/20;  
-        bool obstacleCheck = checkIfObstacle(distance);   // check if the sensed object is an obstacle
-        if (obstacleCheck == false)
-        {
-          distanceToTravel = distance - distanceFromArmToBlock; //distance to travel
-          newAngle = stepsToAngle(aSteps);
-          updateLocation(newAngle, 0);
-          found = true;
-          break;
-        }
-        else
-        {
-          aSteps = findSteps(90, "angle");
-          rotate(aSteps);
-        }
-      }
-    }
-  }
-  if (found == false)
-  {
-    deldist = stepsToDistance(-delSteps);
-    steps = findSteps(deldist, "distance");
-    linear(steps);
-    updateLocation(0, deldist);
-      
-    if (NE != true)
-    {
-      dAngle = helper_rotate(curAngle, -180);
-      aSteps = findSteps(dAngle, "angle");
-      rotate(aSteps);
-      newAngle = stepsToAngle(aSteps);
-      updateLocation(newAngle, 0);
-    }
-    else
-    {
-      dAngle = helper_rotate(curAngle, 0);
-      aSteps = findSteps(dAngle, "angle");
-      rotate(aSteps);
-      newAngle = stepsToAngle(aSteps);
-      updateLocation(newAngle, 0);
-    }
-    delSteps = 0;
-    while( delSteps < 1296)
-    {
-      distance = lowSensor();      // this will need to be the low sensor on the right side of the robot
-      if (distance > 30)
-      {
-        linear(54);
-        delSteps = delSteps + 54;
-        deldist = stepsToDistance(54);
-        updateLocation(0, deldist);
-      }
-      else
-      {
-        aSteps = findSteps(90, "angle");
-        rotate(aSteps);
-        distance = lowSensor();
-        for(int i=0; i< 19; i++)
-        {
-           distance = distance + lowSensor();  // this will need to be the low sensor on the center of the robot
-        }
-        distance = distance/20;  
-        bool obstacleCheck = checkIfObstacle(distance);   // check if the sensed object is an obstacle
-        if (obstacleCheck == false)
-        {  
-          distanceToTravel = distance - distanceFromArmToBlock; //distance to travel
-          deldist = stepsToDistance(delSteps);
-          newAngle = stepsToAngle(aSteps);
-          updateLocation(newAngle, deldist);
-          found = true;
-          break;
-        }
-        else
-        {
-          aSteps = findSteps(-90, "angle");
-          rotate(aSteps);
-        }
-      }
-    }      // this next part *shouldn't* happen
-  }        // but if it does, it returns the robot to the corner of the square
-    if (found == false)
-    {
-    deldist = stepsToDistance(-delSteps);
-    steps = findSteps(deldist, "distance");
-    linear(steps);
-    updateLocation(0, deldist);
-    }
-  return 10*distanceToTravel;
+void turnTo(double targetAngle){
+  double delAngle = helper_rotate(curAngle, targetAngle);
+  int steps = findSteps(delAngle, "angle");
+  rotate(steps);
 }
-
 
 //finds distance to travel
 double findDistance(double x1, double x2, double y1, double y2){
@@ -431,6 +258,83 @@ void updateLocation(double trueAngle, double trueDistance){
   currentCoord[1] += cos(rad) * trueDistance/304.8;
 //  String display = String(currentCoord[0]) + ", " + String(currentCoord[1]); 
 //  logVal("New location: ", display);
+}
+
+
+//blockNum: block we are currently searching for
+//loc:      location of block currently being searched for
+bool findBlock(int blockNum){
+  //values returned
+  int distanceToBlock = 0;
+  int angleToBlock    = 0;
+
+  //Values to solve problem
+  bool found = false;
+  int  loc[] =  { blockX[blockNum], blockY[blockNum] };
+  double angle = findAngle(loc[0], loc[1]); 
+  double angleToTurn = -90;        //left of right
+  double distanceToTravel = 1;      //1 foot
+  int    directionClassifier = 1;  //NE or not? 1 means not NE
+  double distance = 0;  //distance travelled
+  if (angle > 0 && angle < 90){
+    directionClassifier = -1;
+  }
+
+  angleToTurn *= directionClassifier;
+
+  //---------------1st Pass---------------
+  turnTo(angleToTurn); //turns until it reaches angleToTurn
+  double lowD = lowSensor(); 
+  found = lowD < 14;
+  double newAngle = angleToTurn;
+  while ( newAngle > -180 && !found){
+    //Serial.println("1");
+    int steps = findSteps(1, "angle");
+    rotate(-steps);
+    double angleRotated = stepsToAngle(steps);
+    newAngle -= angleRotated;
+    lowD = lowSensor(); 
+    found = lowD < 14;
+  }
+
+  if(!found){//---------------2nd Pass---------------
+    turnTo(angleToTurn);
+    while(distance < distanceToTravel && !found){
+      Serial.println("2");
+      linear(3); //move 3 steps forwards
+      //update distance travelled
+      //found = lowLeftSensor < 20;
+    }
+  }else{ 
+    angleToBlock    = curAngle;    //in deg
+    //distanceToBlock = lowSensor(); //in cm
+  }
+  
+  if(!found){ //---------------3rd Pass---------------
+    Serial.println("3");
+    linear(-distance);
+    distance = 0;
+    turnTo(-180);
+    while(distance < distanceToTravel && !found){
+      linear(3); //move 3 steps forwards
+      //update distance travelled
+      //found = lowRightSensor() < 20;
+      if(found){
+        angleToBlock = -90;
+      //  distanceToBlock = lowRightSensor();
+      }
+    }
+  }else{
+    angleToBlock    = -180;    //in deg
+    //distanceToBlock = lowLeftSensor(); //in cm
+  }
+  if(found){
+   Serial.println("Found"); 
+  }else{
+    Serial.println("Not Found"); 
+    return 0; //false, not found
+  }
+  return 1;
 }
 
 //gets data from raspberry pi

@@ -10,8 +10,8 @@ Servo pincer; // servo objejct for the pincer
 #define PIN_MIN 0
 #define PIN_MAX 60
 
-int angleArm = 97;    // angle for arm servo to pickup block
-int anglePin = 55;  // angle for the pincer servo to grab the block 
+int angleArm = 103;    // angle for arm servo to pickup block
+int anglePin = 60;  // angle for the pincer servo to grab the block 
 int inAngle = 0;
 
 //function to pick up block
@@ -20,7 +20,7 @@ void pickup() {
  delay(250);
  
  arm.write(constrain(angleArm, ARM_MIN, ARM_MAX)); //drop arm to get block (drop it like its hot) 
- delay(250);
+ delay(1000);
 
  pincer.write(constrain(anglePin-27.5, PIN_MIN, PIN_MAX)); //closes the pincer around the block
  delay(250);

@@ -132,6 +132,48 @@ void linear(int steps) // callable function for forwards and backwards movement
 void rotate(int steps)  // callable function for rotation
 {                       // number of steps may need tweaking, depends on the weight distribution; 
  //                          which will have to wait until the robot is fully built
+ if (abs(steps) <= 50){
+  if (steps >= 0) 
+  {
+    digitalWrite(Dir_FR, HIGH);
+    digitalWrite(Dir_BR, HIGH);
+    for ( i = 1; i <= steps; ++i)          //speed at 2.083 rev/s tweaking the 2nd delay can tweak the speed
+    {
+      digitalWrite(Pulse_FL, HIGH);       //currently using 4 microsteps, this is being taken into account in
+      digitalWrite(Pulse_FR, HIGH);       // findSteps function
+      digitalWrite(Pulse_BL, HIGH);
+      digitalWrite(Pulse_BR, HIGH);
+      delayMicroseconds(200);
+      digitalWrite(Pulse_FL, LOW);
+      digitalWrite(Pulse_FR, LOW);
+      digitalWrite(Pulse_BL, LOW);
+      digitalWrite(Pulse_BR, LOW);
+      delayMicroseconds(800);
+    }
+    digitalWrite(Dir_FR, LOW);
+    digitalWrite(Dir_BR, LOW);   
+  }
+  else 
+  {
+    digitalWrite(Dir_FL, LOW);
+    digitalWrite(Dir_BL, LOW);
+    for(int i=0; i < abs(steps); i++){
+      digitalWrite(Pulse_FL, HIGH);
+      digitalWrite(Pulse_FR, HIGH);
+      digitalWrite(Pulse_BL, HIGH);
+      digitalWrite(Pulse_BR, HIGH);
+      delayMicroseconds(200);
+      digitalWrite(Pulse_FL, LOW);
+      digitalWrite(Pulse_FR, LOW);
+      digitalWrite(Pulse_BL, LOW);
+      digitalWrite(Pulse_BR, LOW);
+      delayMicroseconds(800);
+    }
+    digitalWrite(Dir_FL, HIGH);
+    digitalWrite(Dir_BL, HIGH);
+  }
+ }
+ else{
   if (steps >= 0) 
   {
     digitalWrite(Dir_FR, HIGH);
@@ -170,7 +212,10 @@ void rotate(int steps)  // callable function for rotation
     }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_BL, HIGH);
-  }  
+  }
+ }
+  //double truAngle = stepsToAngle(steps);
+  //updateLocation(truAngle, 0);  
 }
 
 double helper_rotate(double olddeg, double newdeg){
@@ -200,67 +245,4 @@ int findSteps(double val, String type){
 
   }  
   return steps;
-}
-
-//blockNum: block we are currently searching for
-//loc:      location of block currently being searched for
-bool findBlock(int blockNum){
-  //values returned
-  int distanceToBlock = 0;
-  int angleToBlock    = 0;
-
-  //Values to solve problem
-  bool found = false;
-  int  loc[] =  { blockX[blockNum], blockY[blockNum] };
-  double angle = findAngle(loc[0], loc[1]); 
-  double angleToTurn = -90;        //left of right
-  double distanceToTravel = 1      //1 foot
-  int    directionClassifier = 1;  //NE or not? 1 means not NE
-  double distance = 0;  //distance travelled
-  if (angle > 0 && angle < 90){
-    directionClassifier = -1;
-  }
-
-  angleToTurn *= directionClassifier;
-
-  //---------------1st Pass---------------
-  turnTo(angleToTurn); //turns until it reaches angleToTurn
-  while ( newAngle > -180 && !found){
-    steps = findSteps(2, "angle");
-    rotate(-steps);
-    //update newAngle
-    found = lowSensor < 20;
-  }
-
-  if(!found){//---------------2nd Pass---------------
-    turnTo(angleToTurn);
-    while(distance < distanceToTravel && !found){
-      linear(3); //move 3 steps forwards
-      //update distance travelled
-      found = lowLeftSensor < 20;
-    }
-  }else{ 
-    angleToBlock    = curAngle;    //in deg
-    distanceToBlock = lowSensor(); //in cm
-  }
-  
-  if(!found){ //---------------3rd Pass---------------
-    linear(-distance);
-    distance = 0;
-    turnTo(-180);
-    while(distance < distanceToTravel && !found){
-      linear(3); //move 3 steps forwards
-      //update distance travelled
-      found = lowRightSensor() < 20;
-      if(found){
-        angleToBlock = -90;
-        distanceToBlock = lowRightSensor();
-      }
-    }
-  }else{
-    angleToBlock    = -180;    //in deg
-    distanceToBlock = lowLeftSensor(); //in cm
-  }
-  
-  return found;
 }
