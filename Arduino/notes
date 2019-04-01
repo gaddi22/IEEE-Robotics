@@ -1,0 +1,15 @@
+finding block method psuedo code:
+
+rotate to -90 (unless going NE)
+rotate -90 (to -180) degrees while scanning for objects
+    if object detected, verify it is a block, not a dowel/ball
+
+if no object detected, return to -90 degrees
+go forward 1 foot while scanning scanning left
+    if object detected, verify it is a block, not a dowel/ball
+
+if no object detected, retreat 1 foot. turn -90 (to -180).
+go forward 1 foot while scanning right
+    if object detected, verify it is a block, not a dowel/ball
+
+return found object distance, angle to it

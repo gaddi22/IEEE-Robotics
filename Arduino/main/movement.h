@@ -10,7 +10,6 @@ double blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
 int    distanceFromArmToBlock = 11; //cm, minimum distance to pick up block
 bool   testCondition = true;        //used to test a single iteration
 
-
 // setup for stepper pins & declaring servos
 int Pulse_FL = 2;
 int Dir_FL = 3;
@@ -25,8 +24,8 @@ int angle;
 int dist;
 int i;
 
-double angleConversionFactor    = 2.025*8;
-double distanceConversionFactor = 1.064 *4;
+double angleConversionFactor    = 2.025*32;
+double distanceConversionFactor = 1.064 *16;
 
 double helper_rotate(double olddeg, double newdeg){
   double deldeg = newdeg - olddeg;
@@ -225,32 +224,6 @@ void rotate(int steps)  // callable function for rotation
     }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_BL, HIGH);
-<<<<<<< HEAD:Arduino/main/movement.h
-  }  
-}
-
-double helper_rotate(double olddeg, double newdeg){
-  double deldeg = newdeg - olddeg;
-  return deldeg;
-}
-
-double stepsToDistance(int steps){
-  return steps/distanceConversionFactor;
-}
-
-double stepsToAngle(int steps){
-  return steps/angleConversionFactor;
-}
-
-//converts angle or distance to a number of corresponding steps
-//val: distance in mm if type = distance
-int findSteps(double val, String type){
-  int steps = 0;
-  if(type == "distance"){
-    //find distance step qty
-    steps = (int)floor(val*distanceConversionFactor);
-=======
->>>>>>> c2e2daf19dba4c3bf3876a92807e79f022ce136e:Arduino/arduinoReadWrite/movement.h
   }
  }
  else{

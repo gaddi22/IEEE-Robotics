@@ -19,11 +19,11 @@ A collection of Arduino code for the robot.
 
 **Subdirectories:**
 
-* main  
+* **main**  
 Main code for arduino. Implemented code will be consolidated here. We will pull code from other places, such
 as 'Resources' to develop this code. This code is the official production code for our robot
 
-* Resources
+* **Resources**  
 Code that is either in testing or used for reference while implementing into main
 
 Pi
