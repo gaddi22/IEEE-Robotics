@@ -5,6 +5,7 @@
 #include "distance.h"
 #include "arm.h"
 #include "color.h"
+#include "direction.h"
 
 //----------------State Manager Variables---------------
 char   msg            = 0;          //read from pi
@@ -43,6 +44,9 @@ void setup() {
 
   //----------Color Senser----------
   tcs.begin();
+
+  //----------Magnetometer----------
+  mag.begin();
   
   //----------Serial Setup----------
   Serial.begin(9600);
@@ -51,8 +55,8 @@ void setup() {
 
 void loop() {
   delay(250);
-  bool isGreen = isGreenPresent();
-  Serial.println(isGreen);
+  //bool isGreen = isGreenPresent();
+  Serial.println(getHeading());
 //  /
 //    pickup();
 //    deposit();

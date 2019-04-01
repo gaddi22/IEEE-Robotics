@@ -1,3 +1,5 @@
+//Handles Orientation of Robot.
+
 #include <Wire.h>
 #include <Adafruit_Sensor.h> 
 #include <Adafruit_LSM303_U.h>
@@ -5,37 +7,24 @@
 /* Assign a unique ID to this sensor at the same time */ 
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
 
-void setup(void) {
-  Serial.begin(9600);
-  Serial.println("Magnetometer Test"); Serial.println("");
-    /* Initialise the sensor */
-    if(!mag.begin()){
-      /* There was a problem detecting the LSM303 ... check your connections */ Serial.println("Ooops, no LSM303 detected ... Check your wiring!"); while(1);
-    } 
-}
-void loop(void) {
-  Serial.print("Compass Heading: ");
-  Serial.println(getHeading());
-}
-
 //arr: array of values to find std dev of
 //qty: size of array/number of indexes to include in result
 double stDev(double arr[], int qty) {
-	double sum = 0;
-	for (int index = 0; index < qty; index++) {
-		sum += arr[index];
-	}
+  double sum = 0;
+  for (int index = 0; index < qty; index++) {
+    sum += arr[index];
+  }
 
-	double meanSample = sum / double(qty);
+  double meanSample = sum / double(qty);
 
-	double sqDevSum = 0;
+  double sqDevSum = 0;
 
-	for (int index = 0; index < qty; index++) {
-		sqDevSum += pow((meanSample - arr[index]), 2);
-	}
+  for (int index = 0; index < qty; index++) {
+    sqDevSum += pow((meanSample - arr[index]), 2);
+  }
 
-	double stDev = sqrt(sqDevSum / double(qty));
-	return stDev;
+  double stDev = sqrt(sqDevSum / double(qty));
+  return stDev;
 }
 
 //returns angle robot is facing
