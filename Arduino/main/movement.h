@@ -10,7 +10,6 @@ double blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
 int    distanceFromArmToBlock = 11; //cm, minimum distance to pick up block
 bool   testCondition = true;        //used to test a single iteration
 
-
 // setup for stepper pins & declaring servos
 int Pulse_FL = 2;
 int Dir_FL = 3;
@@ -25,8 +24,8 @@ int angle;
 int dist;
 int i;
 
-double angleConversionFactor    = 2.025*8;
-double distanceConversionFactor = 1.064 *4;
+double angleConversionFactor    = 2.025*32;
+double distanceConversionFactor = 1.064 *16;
 
 double helper_rotate(double olddeg, double newdeg){
   double deldeg = newdeg - olddeg;

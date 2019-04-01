@@ -9,23 +9,39 @@ The robot is required to:
 * Return the blocks to a location and sort by letter. Location is random.  
 * Avoid objects, other than blocks
 
-We are combining an Arduino Uno and Raspberry Pi to accomplish this task and managing state between the too to send data back and forth.  
+We are combining an Arduino Uno and Raspberry Pi to accomplish this task and managing state between the 2 to send data back and forth.  
 The Arduino will be regarded as the master controller, while the Pi will operate as a slave controller used primarily for image interpretation using Pytesseract.
 
 Arduino
 ---
 
-A collection of Arduino code for the robot
+A collection of Arduino code for the robot.
+
+**Subdirectories:**
+
+* **main**  
+Main code for arduino. Implemented code will be consolidated here. We will pull code from other places, such
+as 'Resources' to develop this code. This code is the official production code for our robot
+
+* **Resources**  
+Code that is either in testing or used for reference while implementing into main
 
 Pi
 ---
 
-A collection of Pi code for the robot. Written exclusively in Python
+A collection of Pi code for the robot. Written exclusively in Python.
 
-Sensor_Sharp
----
+The most notable programs are piReadWrite and State.
 
-Arduino program that uses a light sensor to determine distance
+* **piReadWrite**  
+keeps the pi informed of who's turn it is to have access to the serial line. Manages 
+state and read/writes data from and to the arduino
+
+*Needs file to be read by json parser to be located at './resources/file.json'*
+
+* **State**  
+Holds the state value as an object for piReadWrite
+
 
 Programming guideline
 ---
