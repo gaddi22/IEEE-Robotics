@@ -5,6 +5,7 @@
 #include "distance.h"
 #include "arm.h"
 
+<<<<<<< HEAD:Arduino/main/main.ino
 //----------------State Manager Variables---------------
 char   msg            = 0;          //read from pi
 String root           = "ard";      //sets arduino to active
@@ -15,6 +16,9 @@ int    blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
 int    blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
 int    blockQty = 0;
 double    distanceFromArmToBlock = 12; //cm, minimum distance to pick up block
+=======
+
+>>>>>>> c2e2daf19dba4c3bf3876a92807e79f022ce136e:Arduino/arduinoReadWrite/arduinoReadWrite.ino
 
 void setup() {
   // put your setup code here, to run once:
@@ -44,7 +48,20 @@ void setup() {
 }
 
 void loop() {
+<<<<<<< HEAD:Arduino/main/main.ino
   delay(25);
+=======
+  delay(3000);
+  if(testCondition){
+    findBlock(false);
+    testCondition = false;
+  }
+//    pickup();
+//    deposit();
+  
+  /*
+  delay(1000);
+>>>>>>> c2e2daf19dba4c3bf3876a92807e79f022ce136e:Arduino/arduinoReadWrite/arduinoReadWrite.ino
   
   //testing
   double distance = lowSensor();
@@ -81,7 +98,7 @@ void loop() {
   }
   */
 }
-
+/*
 //prints value to serial monitor
 void logVal(String msg, double val){
   Serial.println(msg + String(val));
@@ -90,15 +107,35 @@ void logVal(String msg, double val){
 void logVal(String msg, String val){
   Serial.println(msg + val);
 }
+*/
+
+//distance: distance to object
+bool checkIfObstacle(double distance){      // these currently call lowSensor, they need to call the High right sensor
+  double a, b, c, theta;
+  a = distance;
+  b = 8.211;
+  c = sqrt(sq(a)+sq(b));
+  theta = asin(b/c);
+  int steps = findSteps(-theta, "angle");
+  rotate(steps);
+  double dist = highRightSensor();
+  if (dist <= 30){
+    for (int i = 0; i < 19; i++){         // might not need this loop at all
+      dist = dist + highRightSensor();  
+    }
+    dist = dist/20;
+    return true;
+  }
+  else{
+    return false;
+  }
+}
 
 
 String coordToString(int x, int y){
   return String(x) + ", " + String(y); 
 }
 
-double degToRad(int deg){
-  return ((double) deg)/180*M_PI;
-}
 
 //finds if doubles are withing a threshold of each other
 bool equal(double val, double newVal){
@@ -124,6 +161,198 @@ double findAngle(int x, int y){
     return angle;
   }
 }
+// function to find block, and return the distance & update the angle.
+double findBlock(boolean NE){
+  boolean found = false;          // not currently using this; may take it out, or make use of it.
+  int delSteps = 0;               // j renamed to delSteps
+  int steps;
+  int aSteps;
+  double distance;
+  double deldist;
+  double dAngle;
+  double distanceToTravel;
+  double newAngle;
+  
+  
+  if (NE != true) {
+    dAngle = helper_rotate(curAngle, -90);
+    aSteps = findSteps(dAngle,"angle");
+    rotate(aSteps);
+    newAngle = stepsToAngle(aSteps);
+    updateLocation(newAngle, 0);
+  }
+  else{
+    dAngle = helper_rotate(curAngle, 90);
+    aSteps = findSteps(dAngle,"angle");
+    rotate(aSteps);
+    newAngle = stepsToAngle(aSteps);
+    updateLocation(newAngle, 0);
+  }
+  while(delSteps < findSteps(90, "angle"))      // 90 degrees is 1458 steps, doing this in increments of 9, because 1458 is divisible by 9.
+  {                                             //    next possible increment is 18, which is over 1 degree, but not sure how much we care about going in increments of less than 1 degree.
+    distance = lowSensor();                     //  could also use the constant 1458 instead of findSteps(90,"angle"), but this way gives it context for now
+    if (distance > 30)
+    {
+      rotate(-9);
+      delSteps = delSteps + 9;
+    }
+    else
+    {
+      for(int i=0; i<19; i++)
+      {
+        distance = distance + lowSensor();
+      }
+      distance = distance/20;
+      bool obstacleCheck = checkIfObstacle(distance);   // check if the sensed object is an obstacle
+      if (obstacleCheck == false)
+      {  
+        distanceToTravel = distance - distanceFromArmToBlock; //distance to travel
+        newAngle = stepsToAngle(-delSteps);
+        updateLocation(newAngle, 0);
+        found = true;
+        break;
+      }
+    }
+  }
+  newAngle = stepsToAngle(-delSteps);
+  updateLocation(newAngle, 0);
+
+
+  
+  //  ------- For 2nd and 3rd pass:
+  //  ------- Need some type of test for when we are on a square next to the edge, to limit how far we go to 6 inches (or 12 iterations of 1/2 inch)
+  //  ------- will need a separate test for each of the 2nd and third pass, something like the NE bool.
+  //  ------- at the moment this is not being taken into account.
+  //  ------- may want to check with the front low sensor again after turning.
+  if (found == false)
+  {
+    if (NE != true) 
+    {
+      dAngle = helper_rotate(curAngle, -90);
+      aSteps = findSteps(dAngle,"angle");
+      rotate(aSteps);
+      newAngle = stepsToAngle(aSteps);
+      updateLocation(newAngle, 0);
+    }
+    else
+    {
+      dAngle = helper_rotate(curAngle, 90);
+      aSteps = findSteps(dAngle,"angle");
+      rotate(aSteps);
+      newAngle = stepsToAngle(aSteps);
+      updateLocation(newAngle, 0);
+    }
+    delSteps = 0;
+    while( delSteps < 1296)        // delSteps is the step counter, for this one, while it is less than the # of steps for 1 foot
+    {                              //   this value is 1297.2288; but we're flooring it, & it is an int, so it'll be 1297.
+                                   //   subtracting 1 gives a clean iteration of 54; so new 
+      distance = lowSensor();      // this will need to be the low sensor on the left side of the robot (which we don't have set up atm)
+      if (distance > 30)
+      {
+        linear(54);
+        delSteps = delSteps + 54;
+        deldist = stepsToDistance(54);
+        updateLocation(0, deldist);
+      }
+      else
+      {
+        aSteps = findSteps(-90, "angle");
+        rotate(aSteps);
+        distance = lowSensor();
+        for(int i=0; i< 19; i++)
+        {
+           distance = distance + lowSensor();  // this will need to be the low sensor on the center of the robot
+        }
+        distance = distance/20;  
+        bool obstacleCheck = checkIfObstacle(distance);   // check if the sensed object is an obstacle
+        if (obstacleCheck == false)
+        {
+          distanceToTravel = distance - distanceFromArmToBlock; //distance to travel
+          newAngle = stepsToAngle(aSteps);
+          updateLocation(newAngle, 0);
+          found = true;
+          break;
+        }
+        else
+        {
+          aSteps = findSteps(90, "angle");
+          rotate(aSteps);
+        }
+      }
+    }
+  }
+  if (found == false)
+  {
+    deldist = stepsToDistance(-delSteps);
+    steps = findSteps(deldist, "distance");
+    linear(steps);
+    updateLocation(0, deldist);
+      
+    if (NE != true)
+    {
+      dAngle = helper_rotate(curAngle, -180);
+      aSteps = findSteps(dAngle, "angle");
+      rotate(aSteps);
+      newAngle = stepsToAngle(aSteps);
+      updateLocation(newAngle, 0);
+    }
+    else
+    {
+      dAngle = helper_rotate(curAngle, 0);
+      aSteps = findSteps(dAngle, "angle");
+      rotate(aSteps);
+      newAngle = stepsToAngle(aSteps);
+      updateLocation(newAngle, 0);
+    }
+    delSteps = 0;
+    while( delSteps < 1296)
+    {
+      distance = lowSensor();      // this will need to be the low sensor on the right side of the robot
+      if (distance > 30)
+      {
+        linear(54);
+        delSteps = delSteps + 54;
+        deldist = stepsToDistance(54);
+        updateLocation(0, deldist);
+      }
+      else
+      {
+        aSteps = findSteps(90, "angle");
+        rotate(aSteps);
+        distance = lowSensor();
+        for(int i=0; i< 19; i++)
+        {
+           distance = distance + lowSensor();  // this will need to be the low sensor on the center of the robot
+        }
+        distance = distance/20;  
+        bool obstacleCheck = checkIfObstacle(distance);   // check if the sensed object is an obstacle
+        if (obstacleCheck == false)
+        {  
+          distanceToTravel = distance - distanceFromArmToBlock; //distance to travel
+          deldist = stepsToDistance(delSteps);
+          newAngle = stepsToAngle(aSteps);
+          updateLocation(newAngle, deldist);
+          found = true;
+          break;
+        }
+        else
+        {
+          aSteps = findSteps(-90, "angle");
+          rotate(aSteps);
+        }
+      }
+    }      // this next part *shouldn't* happen
+  }        // but if it does, it returns the robot to the corner of the square
+    if (found == false)
+    {
+    deldist = stepsToDistance(-delSteps);
+    steps = findSteps(deldist, "distance");
+    linear(steps);
+    updateLocation(0, deldist);
+    }
+  return 10*distanceToTravel;
+}
+
 
 //finds distance to travel
 double findDistance(double x1, double x2, double y1, double y2){
@@ -133,7 +362,30 @@ double findDistance(double x1, double x2, double y1, double y2){
   distance = distance * 304.8;      //convert distance to millimeters
   return (distance);
 }
-
+/*
+// function to find and store mothership data.
+void findMotherShip(){
+  bool found = false;
+  bool orthagonal = false;
+  double motherShipAngle, motherShipX, motherShipY;
+  double pathX[] = {4, 2, 4, 6};
+  double pathY[] = {6, 4, 2, 4};    // set points for checking, if we don't find it on the first 360
+  int green = rgbSensor();                          // read the rgb sensor
+  int steps = findSteps(-10, "angle");
+  for (int i = 0; i <36; i++){
+    // read the RGB sensor
+    rotate(steps);
+   // if( RGB sensor == true){
+      
+    }
+  }
+  double targetAngle = findAngle(pathX[i], pathY[i]);
+  turnTo(targetAngle);
+  double distance = findDistance(currentCoord[0], pathX[i], currentCoord[1], pathY[i]);
+  int dSteps = findSteps(distance, "distance");
+  int delSteps = 0;
+}
+*/
 //finds path to travel to point (x,y) from currentCoord.
 //currently finds straight line
 void findPath(int x, int y){
@@ -159,6 +411,7 @@ void findPath(int x, int y){
   delay(7000);
 }
 
+<<<<<<< HEAD:Arduino/main/main.ino
 //receives data from pi and loads it into state variables
 void receiveBlockData(){
   int qty = 0;
@@ -190,21 +443,117 @@ void receiveBlockData(){
   }
 }
 
+=======
+// funtion to rotate up to 180 degrees (90 CCW, then 90 Cw), and find the lowest distance from the lowSensor
+// also takes in optional boolean for mothership,and optional double for the change in angle, these default to false & -1 respectively
+void rotateScan(double distance, bool motherShip = false, double delAngle = -1){
+  double lowDistAngle;
+  double returnAngle = curAngle;
+  int steps = findSteps(delAngle, "angle");           // this might have to change for accuracy reasons, not sure right now
+  for(int angle = 0; angle < 90; angle++){      // turn 90 degrees CCW, scan after each degree
+    rotate(steps);
+    double dist2 = lowSensor();
+    if( dist2 < distance){                      // if the new scan is lower than the lowest scan
+      distance = dist2;                         // set the lowest scan to the current scan
+      lowDistAngle = curAngle;                  // store the angle of the lowest scan
+    }
+    else if(dist2 > distance){                  // if the distance is growing, break out & go to the next function.
+      break;
+    }
+  }
+  turnTo(returnAngle);                          // go back to the original angle
+  for(int angle = 0; angle < 90; angle++){      // loop to go 90 degrees CW, still scanning after each degree
+    rotate(-steps);
+    double dist2 = lowSensor();
+    if(dist2 < distance){
+      distance = dist2;
+      lowDistAngle = curAngle;                  // same stuff
+    }
+    else if(dist2 > distance){
+      break;
+    }
+  }
+  if(motherShip = true){                        // if this function is called with the intent to scan for the mothership, maybe do a 360 scan
+    turnTo(returnAngle-180);                    // though, not sure if this would be necessary/usefull
+    returnAngle = curAngle;
+    for(int angle = 0; angle < 90; angle++){ 
+      rotate(steps);
+      double dist2 = lowSensor();
+      if( dist2 < distance){
+        distance = dist2;
+        lowDistAngle = curAngle;    
+      }
+      else if(dist2 > distance){                // same stuff
+        break;
+      }
+    }
+    turnTo(returnAngle);
+    for(int angle = 0; angle < 90; angle++){
+      rotate(-steps);
+      double dist2 = lowSensor();
+      if(dist2 < distance){
+        distance = dist2;
+        lowDistAngle = curAngle;
+      }
+      else if(dist2 > distance){
+        break;
+      }
+    }
+  }
+  if (distance < 14){                           // rotate to the angle that had the lowest distance
+    turnTo(lowDistAngle);
+  }
+}
+
+
+>>>>>>> c2e2daf19dba4c3bf3876a92807e79f022ce136e:Arduino/arduinoReadWrite/arduinoReadWrite.ino
 //moves robot to new angle and moves distance
 void runPath(int aSteps, int dSteps){
   rotate(aSteps); //rotate delta angle 
   linear(dSteps); //travel distance in straight line
 }
 
-void updateLocation(double trueAngle, double trueDistance){
-  curAngle         = trueAngle;
-  double rad       = degToRad(trueAngle);           //angle in radians
-  //new location, convert distance to block location
-  currentCoord[0] += sin(rad) * trueDistance/304.8;
-  currentCoord[1] += cos(rad) * trueDistance/304.8;
-//  String display = String(currentCoord[0]) + ", " + String(currentCoord[1]); 
-//  logVal("New location: ", display);
+void turnTo(double targetAngle){
+  double delAngle = helper_rotate(curAngle, targetAngle);
+  int steps = findSteps(delAngle, "angle");
+  rotate(steps);
 }
+
+// function to zero in on a block, to be run either in or after findBlock function
+// this attempts to aim at the center of a block, & return the shortest distance from the robot to the block.
+// hopefully to deal with angled blocks
+double zeroInOnBlock(double distance){
+  double CCWAngle, CWAngle;
+  double returnAngle = curAngle;
+  int steps = findSteps(-.5, "angle");           // this might have to change for accuracy reasons, not sure right now
+  for(int angle = 0; angle < 10; angle++){      // turn 90 degrees CCW, scan after each degree
+    rotate(steps);
+    double dist2 = lowSensor();
+    if( dist2 < distance){                      // if the new reading is lower than the lowest reading
+      distance = dist2;                         // set the lowest reading to the current reading
+    }
+    else if(dist2 > 14){                  // if the distance is growing, break out & go to the next function.
+      break;
+    }
+    CCWAngle = curAngle;
+  }
+  turnTo(returnAngle);                          // go back to the original angle
+  for(int angle = 0; angle < 10; angle++){      // loop to go 90 degrees CW, still scanning after each degree
+    rotate(-steps);
+    double dist2 = lowSensor();
+    if(dist2 < distance){
+      distance = dist2;                         // same stuff
+    }
+    else if(dist2 > 14){
+      break;
+    }
+    CWAngle = curAngle;
+  }
+  double tarAngle = (CCWAngle + CWAngle)/2;
+  turnTo(tarAngle);
+  return distance;
+}
+
 
 //gets data from raspberry pi
 void receiveData(){
