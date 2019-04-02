@@ -28,16 +28,28 @@ void setup() {
   pincer.attach(10);  // attaches the servo on pin 10 to the servo object pincer
   arm.write(inAngle);
   pincer.write(inAngle);
+
+  //----------Color Senser----------
+  tcs.begin();
+
+  //----------Magnetometer----------
+  //mag.begin();
   
   //----------Serial Setup----------
   Serial.begin(9600);
+  delay(2500);
 }
 
 void loop() {
 
 
   delay(3000);
-  findMotherShip();
+  int dSteps = findSteps(1219, "distance");
+  linear(dSteps);
+  linear(-dSteps);
+  int aSteps = findSteps(360.0, "angle");
+  rotate(aSteps);
+//  findMotherShip();
 //    pickup();
 //    deposit();
   
@@ -299,96 +311,94 @@ void rotateScan(double distance, double delAngle = -1){
 
 // function to find and store mothership data.
 void findMotherShip(){
+  Serial.println("0");
   bool found = false;
-  double motherShipAngle, motherShipX, motherShipY;
+//  double motherShipAngle, motherShipX, motherShipY;
   double pathX[] = {2, 6};
   double pathY[] = {4, 4};    // set points for checking, if we don't find it on the first 360
-  bool isgreen;                          
-  int steps = findSteps(-10, "angle");
-  for (int i = 0; i <36; i++){            // do 360 degree check on the starting point.
+  bool isgreen = false;                          
+  int steps = findSteps(-15.0, "angle");
+  for (int i = 0; i <24; i++){            // do 360 degree check on the starting point.
     isgreen = isGreenPresent();
     if( isgreen == true){                 // if green is present in the current direction, break out of the loop
       found = true;
+      Serial.println("1");
       break;
     }
     rotate(steps);                        // rotate 10 degrees
   }
   if (found != true){                     // if the mothership isn't found, 
+    turnTo(0.0);
     for (int i = 0; i <= 1; i++){         //  go to the next point and do a scan there
       double targetAngle = findAngle(pathX[i], pathY[i]);
       turnTo(targetAngle);
       double distance = findDistance(currentCoord[0], pathX[i], currentCoord[1], pathY[i]);
       int dSteps = findSteps(distance, "distance");
       linear(dSteps);
-      double returnAngle = curAngle;
-      for (int i = 0; i <= 24; i++){      // there might be a cleaner way of doing this, but the idea
-        if( i <= 12){                     // is to do two seperate 120 degree scans, checking every 10 degrees
-          isgreen = isGreenPresent();
-          if( isgreen == true){
-            found = true;                 // if we find it, set found to true, and break out of the loop
-            break;
-          }
-          rotate(steps);                  // first one is CCW
+      turnTo(curAngle + 120.0);
+      for (int i = 0; i < 16; i++){       // there might be a cleaner way of doing this, but the idea
+                                          // is to do two seperate 120 degree scans, checking every 10 degrees
+        isgreen = isGreenPresent();
+        if( isgreen == true){
+          found = true;                   // if we find it, set found to true, and break out of the loop
+          Serial.println("2");
+          break;
         }
-        else if(i == 13){
-          turnTo(returnAngle);
-          rotate(-steps);
-        }
-        else{
-          isgreen = isGreenPresent();
-          if ( isgreen == true){
-            found = true;
-            break;
-          }
-          rotate(-steps);                 // second one is CW
-        }
+        rotate(steps);                    // first one is CCW
       }
       if( found == true){                 // if we found the mothership, break out of the loop
+        Serial.println("4");
         break;                            // this may seem redundant, but we have to do this twice since there are 2 for loops
       }
     }
   }
+  else{
+    double dtt= 100;                      // dtt = distance to target
+    while(dtt > 14){
   // need to step towards the source of the green light, in increments of our sensor range; 14cm, or 140 mm
-  double distance = 140.0;
-  int dSteps = findSteps(distance, "distance");
+      double distance = 140.0;
+      int dSteps = findSteps(distance, "distance");
   // sensor scan of the lowSensor, and the highSensor   high sensor isn't currently set up, but will be soon(TM)
-  double dtt = lowSensor();
-  if (dtt > 14){
-    linear(dSteps);
-  }
-  else{                                   // need to find out if we are pointed at a corner
-    rotateScan(dtt);
-    double returnAngle = curAngle;
-    rotate(2*steps);
-    bool isgreen1 = isGreenPresent();
-    turnTo(returnAngle);
-    rotate(-2*steps);
-    bool isgreen2 = isGreenPresent();
-    turnTo(returnAngle);
-    if(isgreen1 == true && isgreen2 == true){
-      return;
-    }
-    else {
-      double dist = lowSensor();                       // dist from sensor to corner
-      double x = 142.5;                                // dist from sensor to edge of wheel
-      double theta = asin(x/(sqrt(sq(x)+sq(dist))));   // angle 
-      steps = findSteps(theta, "angle");               // steps for rotation
-      dSteps = findSteps(108.24, "distance");          // steps for 1/2 the distance of the mothership
-      if (isgreen1 == true){
-        rotate(-steps);                                // CCW rotation
-        linear(dSteps); 
-        steps = findSteps(90, "angle");                // rotate 90 degrees back
-        rotate(steps);         
-      }
-      else{
-        rotate(steps);                                 // CW rotation
+      dtt = lowSensor();
+      if (dtt > 14){
         linear(dSteps);
-        steps = findSteps(-90, "angle");
-        rotate(steps);                                 // rotate 90 degrees back
       }
-      dtt = lowSensor();                               // take another measurement
-      rotateScan(dtt);                                 // find orthagonal
-      return;
+      else{                                   // need to find out if we are pointed at a corner
+        rotateScan(dtt);
+        double returnAngle = curAngle;
+        steps = findSteps(-20.0, "angle");
+        rotate(steps);
+        bool isgreen1 = isGreenPresent();
+        turnTo(returnAngle);
+        rotate(-steps);
+        bool isgreen2 = isGreenPresent();
+        turnTo(returnAngle);
+        if(isgreen1 == true && isgreen2 == true){
+          return;
+        }
+        else {
+          double dist = lowSensor();                       // dist from sensor to corner
+          double x = 142.5;                                // dist from sensor to edge of wheel
+          double theta = asin(x/(sqrt(sq(x)+sq(dist))));   // angle 
+          steps = findSteps(theta, "angle");               // steps for rotation
+          dSteps = findSteps(108.24, "distance");          // steps for 1/2 the distance of the mothership
+          if (isgreen1 == true){
+            rotate(-steps);                                // CCW rotation
+            linear(dSteps); 
+            steps = findSteps(90.0, "angle");                // rotate 90 degrees back
+            rotate(steps);         
+          }
+          else{
+            rotate(steps);                                 // CW rotation
+            linear(dSteps);
+            steps = findSteps(-90.0, "angle");
+            rotate(steps);                                 // rotate 90 degrees back
+          }
+          dtt = lowSensor();                               // take another measurement
+          rotateScan(dtt);                                 // find orthagonal
+          return;
+        }
+      }
     }
   }
 }
