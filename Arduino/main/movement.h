@@ -192,7 +192,7 @@ void rotate(int steps)  // callable function for rotation
 {                       // number of steps may need tweaking, depends on the weight distribution; 
  //                          which will have to wait until the robot is fully built
  
- if (abs(steps) <= 50){
+ if (abs(steps) <= 195){
   if (steps >= 0) 
   {
     digitalWrite(Dir_FR, HIGH);
@@ -203,12 +203,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);       // findSteps function
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(50);
+      delayMicroseconds(100);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(600);
+      delayMicroseconds(550);
     }
     digitalWrite(Dir_FR, LOW);
     digitalWrite(Dir_BR, LOW);   
@@ -222,12 +222,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(50);
+      delayMicroseconds(100);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(600);
+      delayMicroseconds(550);
     }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_BL, HIGH);
@@ -244,12 +244,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);       // findSteps function
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(50);
+      delayMicroseconds(100);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(150);
+      delayMicroseconds(200);
     }
     digitalWrite(Dir_FR, LOW);
     digitalWrite(Dir_BR, LOW);   
@@ -263,12 +263,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(50);
+      delayMicroseconds(100);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(150);
+      delayMicroseconds(200);
     }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_BL, HIGH);

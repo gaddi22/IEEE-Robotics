@@ -42,9 +42,8 @@ void setup() {
 void loop() {
 
 
-  delay(1000);
-  bool isGreen = isGreenPresent();
-//  findMotherShip();
+  delay(3000);
+  findMotherShip();
 //    pickup();
 //    deposit();
   
@@ -312,8 +311,8 @@ void findMotherShip(){
   double pathX[] = {2, 6};
   double pathY[] = {4, 4};    // set points for checking, if we don't find it on the first 360
   bool isgreen = false;                          
-  int steps = findSteps(-15.0, "angle");
-  for (int i = 0; i <24; i++){            // do 360 degree check on the starting point.
+  int steps = findSteps(20.0, "angle");
+  for (int i = 0; i <18; i++){            // do 360 degree check on the starting point.
     isgreen = isGreenPresent();
     if( isgreen == true){                 // if green is present in the current direction, break out of the loop
       found = true;
@@ -332,9 +331,9 @@ void findMotherShip(){
       int dSteps = findSteps(distance, "distance");
       linear(dSteps);
       turnTo(0.0);
-      if (i < 1){ turnTo(30.0); }
-      else { turnTo(210); }
-      for (int i = 0; i < 16; i++){       // scan from curAngle+120 to curAngle-120
+      if (i < 1){ turnTo(150.0); }
+      else { turnTo(-30.0); }
+      for (int i = 0; i < 12; i++){       // scan from curAngle+120 to curAngle-120
                                           
         isgreen = isGreenPresent();
         if( isgreen == true){
@@ -352,55 +351,58 @@ void findMotherShip(){
     }
   }
   else{
-    double dtt= 100;                      // dtt = distance to target
-    while(dtt > 14){
-  // need to step towards the source of the green light, in increments of our sensor range; 14cm, or 140 mm
-      double distance = 140.0;
-      int dSteps = findSteps(distance, "distance");
-  // sensor scan of the lowSensor, and the highSensor   high sensor isn't currently set up, but will be soon(TM)
+    double dtt= lowSensor();              // dtt = distance to target
+                                          // need to step towards the source of the green light, in increments of our sensor range; 14cm, or 140 mm (doing 130 mm for now)
+    double distance = 130.0;
+    int dSteps = findSteps(distance, "distance");
+    for (int i = 0; i < 6; i++){
+      delay(150);
       dtt = lowSensor();
-      if (dtt > 14){
+      if (dtt < 13){
+        break;
+      }
+      linear(dSteps);
+                                       // sensor scan of the lowSensor, and the highSensor   high sensor isn't currently set up, but will be soon(TM)
+    }
+                                       // need to find out if we are pointed at a corner
+    rotateScan(dtt);
+    double returnAngle = curAngle;
+    steps = findSteps(30.0, "angle");  // this value might need to be higher
+    rotate(steps);
+    bool isgreen2 = isGreenPresent();
+    turnTo(returnAngle);
+    rotate(-steps);
+    bool isgreen1 = isGreenPresent();
+    turnTo(returnAngle);
+    if(isgreen1 == true && isgreen2 == true){
+      return;
+    }
+    else {
+      double dist = lowSensor();                       // dist from sensor to corner
+      double x = 142.5;                                // dist from sensor to edge of wheel
+      double theta = asin(x/(sqrt(sq(x)+sq(dist))));   // angle 
+      steps = findSteps(theta, "angle");               // steps for rotation
+      dSteps = findSteps(108.24, "distance");          // steps for 1/2 the distance of the mothership
+      if (isgreen1 == true){
+        rotate(-steps);                                // CCW rotation
+        linear(dSteps); 
+        steps = findSteps(90.0, "angle");                // rotate 90 degrees back
+        rotate(steps);         
+      }
+      else{
+        rotate(steps);                                 // CW rotation
         linear(dSteps);
+        steps = findSteps(-90.0, "angle");
+        rotate(steps);                                 // rotate 90 degrees back
       }
-      else{                                   // need to find out if we are pointed at a corner
-        rotateScan(dtt);
-        double returnAngle = curAngle;
-        steps = findSteps(-20.0, "angle");
-        rotate(steps);
-        bool isgreen1 = isGreenPresent();
-        turnTo(returnAngle);
-        rotate(-steps);
-        bool isgreen2 = isGreenPresent();
-        turnTo(returnAngle);
-        if(isgreen1 == true && isgreen2 == true){
-          return;
-        }
-        else {
-          double dist = lowSensor();                       // dist from sensor to corner
-          double x = 142.5;                                // dist from sensor to edge of wheel
-          double theta = asin(x/(sqrt(sq(x)+sq(dist))));   // angle 
-          steps = findSteps(theta, "angle");               // steps for rotation
-          dSteps = findSteps(108.24, "distance");          // steps for 1/2 the distance of the mothership
-          if (isgreen1 == true){
-            rotate(-steps);                                // CCW rotation
-            linear(dSteps); 
-            steps = findSteps(90.0, "angle");                // rotate 90 degrees back
-            rotate(steps);         
-          }
-          else{
-            rotate(steps);                                 // CW rotation
-            linear(dSteps);
-            steps = findSteps(-90.0, "angle");
-            rotate(steps);                                 // rotate 90 degrees back
-          }
-          dtt = lowSensor();                               // take another measurement
-          rotateScan(dtt);                                 // find orthagonal
-          return;
-        }
-      }
+      dtt = lowSensor();                               // take another measurement
+      rotateScan(dtt);                                 // find orthagonal
+      return;
     }
   }
 }
+
+
 
 
 //finds path to travel to point (x,y) from currentCoord.
