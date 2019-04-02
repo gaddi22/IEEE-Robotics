@@ -143,6 +143,7 @@ bool isGreenPresent(){
 
   for(int index = 0; index < 6; index++){
     colors[index] = colorSense();
+    Serial.println(colors[index]);
     delay(100);
   }
 

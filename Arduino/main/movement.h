@@ -67,7 +67,7 @@ void updateLocation(double trueAngle, double trueDistance){
   else if(curAngle < -180){
     curAngle = curAngle +360;
   }
-  double rad       = degToRad(trueAngle);           //angle in radians
+  double rad       = degToRad(curAngle);           //angle in radians
   //new location, convert distance to block location
   currentCoord[0] += sin(rad) * trueDistance/304.8;
   currentCoord[1] += cos(rad) * trueDistance/304.8;
@@ -191,18 +191,16 @@ void linear(int steps) // callable function for forwards and backwards movement
 void rotate(int steps)  // callable function for rotation
 {                       // number of steps may need tweaking, depends on the weight distribution; 
  //                          which will have to wait until the robot is fully built
- int j = 0; 
- unsigned long currTime;
+ 
  if (abs(steps) <= 50){
   if (steps >= 0) 
   {
     digitalWrite(Dir_FR, HIGH);
     digitalWrite(Dir_BR, HIGH);
-    currTime = millis();
-    while (millis() - currTime < 500){
-    if(j< (steps/2)){
-      digitalWrite(Pulse_FL, HIGH);
-      digitalWrite(Pulse_FR, HIGH);
+    for ( i = 1; i <= steps; ++i)          //speed at 2.083 rev/s tweaking the 2nd delay can tweak the speed
+    {
+      digitalWrite(Pulse_FL, HIGH);       //currently using 4 microsteps, this is being taken into account in
+      digitalWrite(Pulse_FR, HIGH);       // findSteps function
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
       delayMicroseconds(50);
@@ -210,148 +208,8 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(100);
-      delayMicroseconds(188-(.376*(millis()-currTime)));
-      j++;
+      delayMicroseconds(600);
     }
-    else{
-      break;
-    }
-   }
-   for(int i =0; i < (steps - (2*j)); i++){
-     digitalWrite(Pulse_FL, HIGH);
-     digitalWrite(Pulse_FR, HIGH);
-     digitalWrite(Pulse_BL, HIGH);
-     digitalWrite(Pulse_BR, HIGH);
-     delayMicroseconds(50);
-     digitalWrite(Pulse_FL, LOW);
-     digitalWrite(Pulse_FR, LOW);
-     digitalWrite(Pulse_BL, LOW);
-     digitalWrite(Pulse_BR, LOW);
-     delayMicroseconds(100);
-   }
-   currTime = millis();
-   for (int i = 0; i < j; i++){
-     digitalWrite(Pulse_FL, HIGH);
-     digitalWrite(Pulse_FR, HIGH);
-     digitalWrite(Pulse_BL, HIGH);
-     digitalWrite(Pulse_BR, HIGH);
-     delayMicroseconds(50);
-     digitalWrite(Pulse_FL, LOW);
-     digitalWrite(Pulse_FR, LOW);
-     digitalWrite(Pulse_BL, LOW);
-     digitalWrite(Pulse_BR, LOW);
-     delayMicroseconds(100);
-     delayMicroseconds(.376*(millis() - currTime));
-   }
-   digitalWrite(Dir_FR, LOW);
-   digitalWrite(Dir_BR, LOW);   
-  }
-  else 
-  {
-    digitalWrite(Dir_FL, LOW);
-    digitalWrite(Dir_BL, LOW);
-    currTime = millis();
-    while (millis() - currTime < 500){
-    if(j< (steps/2)){
-      digitalWrite(Pulse_FL, HIGH);
-      digitalWrite(Pulse_FR, HIGH);
-      digitalWrite(Pulse_BL, HIGH);
-      digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(50);
-      digitalWrite(Pulse_FL, LOW);
-      digitalWrite(Pulse_FR, LOW);
-      digitalWrite(Pulse_BL, LOW);
-      digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(100);
-      delayMicroseconds(188-(.376*(millis()-currTime)));
-      j++;
-    }
-    else{
-      break;
-    }
-   }
-   for(int i =0; i < (steps - (2*j)); i++){
-     digitalWrite(Pulse_FL, HIGH);
-     digitalWrite(Pulse_FR, HIGH);
-     digitalWrite(Pulse_BL, HIGH);
-     digitalWrite(Pulse_BR, HIGH);
-     delayMicroseconds(50);
-     digitalWrite(Pulse_FL, LOW);
-     digitalWrite(Pulse_FR, LOW);
-     digitalWrite(Pulse_BL, LOW);
-     digitalWrite(Pulse_BR, LOW);
-     delayMicroseconds(100);
-   }
-   currTime = millis();
-   for (int i = 0; i < j; i++){
-     digitalWrite(Pulse_FL, HIGH);
-     digitalWrite(Pulse_FR, HIGH);
-     digitalWrite(Pulse_BL, HIGH);
-     digitalWrite(Pulse_BR, HIGH);
-     delayMicroseconds(50);
-     digitalWrite(Pulse_FL, LOW);
-     digitalWrite(Pulse_FR, LOW);
-     digitalWrite(Pulse_BL, LOW);
-     digitalWrite(Pulse_BR, LOW);
-     delayMicroseconds(100);
-     delayMicroseconds(.376*(millis() - currTime));
-   }
-   digitalWrite(Dir_FL, HIGH);
-   digitalWrite(Dir_BL, HIGH);
-  }
- }
- else{
-  if (steps >= 0) 
-  {
-    digitalWrite(Dir_FR, HIGH);
-    digitalWrite(Dir_BR, HIGH);
-    currTime = millis();
-    while (millis() - currTime < 500){
-    if(j< (steps/2)){
-      digitalWrite(Pulse_FL, HIGH);
-      digitalWrite(Pulse_FR, HIGH);
-      digitalWrite(Pulse_BL, HIGH);
-      digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(50);
-      digitalWrite(Pulse_FL, LOW);
-      digitalWrite(Pulse_FR, LOW);
-      digitalWrite(Pulse_BL, LOW);
-      digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(100);
-      delayMicroseconds(188-(.376*(millis()-currTime)));
-      j++;
-    }
-    else{
-      break;
-    }
-   }
-   for(int i =0; i < (steps - (2*j)); i++){
-     digitalWrite(Pulse_FL, HIGH);
-     digitalWrite(Pulse_FR, HIGH);
-     digitalWrite(Pulse_BL, HIGH);
-     digitalWrite(Pulse_BR, HIGH);
-     delayMicroseconds(50);
-     digitalWrite(Pulse_FL, LOW);
-     digitalWrite(Pulse_FR, LOW);
-     digitalWrite(Pulse_BL, LOW);
-     digitalWrite(Pulse_BR, LOW);
-     delayMicroseconds(100);
-   }
-   currTime = millis();
-   for (int i = 0; i < j; i++){
-     digitalWrite(Pulse_FL, HIGH);
-     digitalWrite(Pulse_FR, HIGH);
-     digitalWrite(Pulse_BL, HIGH);
-     digitalWrite(Pulse_BR, HIGH);
-     delayMicroseconds(50);
-     digitalWrite(Pulse_FL, LOW);
-     digitalWrite(Pulse_FR, LOW);
-     digitalWrite(Pulse_BL, LOW);
-     digitalWrite(Pulse_BR, LOW);
-     delayMicroseconds(100);
-     delayMicroseconds(.376*(millis() - currTime));
-   }
     digitalWrite(Dir_FR, LOW);
     digitalWrite(Dir_BR, LOW);   
   }
@@ -359,9 +217,7 @@ void rotate(int steps)  // callable function for rotation
   {
     digitalWrite(Dir_FL, LOW);
     digitalWrite(Dir_BL, LOW);
-    currTime = millis();
-    while (millis() - currTime < 500){
-    if(j< (steps/2)){
+    for(int i=0; i < abs(steps); i++){
       digitalWrite(Pulse_FL, HIGH);
       digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
@@ -371,40 +227,49 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(100);
-      delayMicroseconds(188-(.376*(millis()-currTime)));
-      j++;
+      delayMicroseconds(600);
     }
-    else{
-      break;
+    digitalWrite(Dir_FL, HIGH);
+    digitalWrite(Dir_BL, HIGH);
+  }
+ }
+ else{
+  if (steps >= 0) 
+  {
+    digitalWrite(Dir_FR, HIGH);
+    digitalWrite(Dir_BR, HIGH);
+    for ( i = 1; i <= steps; ++i)          //speed at 2.083 rev/s tweaking the 2nd delay can tweak the speed
+    {
+      digitalWrite(Pulse_FL, HIGH);       //currently using 4 microsteps, this is being taken into account in
+      digitalWrite(Pulse_FR, HIGH);       // findSteps function
+      digitalWrite(Pulse_BL, HIGH);
+      digitalWrite(Pulse_BR, HIGH);
+      delayMicroseconds(50);
+      digitalWrite(Pulse_FL, LOW);
+      digitalWrite(Pulse_FR, LOW);
+      digitalWrite(Pulse_BL, LOW);
+      digitalWrite(Pulse_BR, LOW);
+      delayMicroseconds(150);
     }
-   }
-   for(int i =0; i < (steps - (2*j)); i++){
-     digitalWrite(Pulse_FL, HIGH);
-     digitalWrite(Pulse_FR, HIGH);
-     digitalWrite(Pulse_BL, HIGH);
-     digitalWrite(Pulse_BR, HIGH);
-     delayMicroseconds(50);
-     digitalWrite(Pulse_FL, LOW);
-     digitalWrite(Pulse_FR, LOW);
-     digitalWrite(Pulse_BL, LOW);
-     digitalWrite(Pulse_BR, LOW);
-     delayMicroseconds(100);
-   }
-   currTime = millis();
-   for (int i = 0; i < j; i++){
-     digitalWrite(Pulse_FL, HIGH);
-     digitalWrite(Pulse_FR, HIGH);
-     digitalWrite(Pulse_BL, HIGH);
-     digitalWrite(Pulse_BR, HIGH);
-     delayMicroseconds(50);
-     digitalWrite(Pulse_FL, LOW);
-     digitalWrite(Pulse_FR, LOW);
-     digitalWrite(Pulse_BL, LOW);
-     digitalWrite(Pulse_BR, LOW);
-     delayMicroseconds(100);
-     delayMicroseconds(.376*(millis() - currTime));
-   }
+    digitalWrite(Dir_FR, LOW);
+    digitalWrite(Dir_BR, LOW);   
+  }
+  else 
+  {
+    digitalWrite(Dir_FL, LOW);
+    digitalWrite(Dir_BL, LOW);
+    for(int i=0; i < abs(steps); i++){
+      digitalWrite(Pulse_FL, HIGH);
+      digitalWrite(Pulse_FR, HIGH);
+      digitalWrite(Pulse_BL, HIGH);
+      digitalWrite(Pulse_BR, HIGH);
+      delayMicroseconds(50);
+      digitalWrite(Pulse_FL, LOW);
+      digitalWrite(Pulse_FR, LOW);
+      digitalWrite(Pulse_BL, LOW);
+      digitalWrite(Pulse_BR, LOW);
+      delayMicroseconds(150);
+    }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_BL, HIGH);
   }

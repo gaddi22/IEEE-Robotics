@@ -37,18 +37,13 @@ void setup() {
   
   //----------Serial Setup----------
   Serial.begin(9600);
-  delay(2500);
 }
 
 void loop() {
 
 
-  delay(3000);
-  int dSteps = findSteps(1219, "distance");
-  linear(dSteps);
-  linear(-dSteps);
-  int aSteps = findSteps(360.0, "angle");
-  rotate(aSteps);
+  delay(1000);
+  bool isGreen = isGreenPresent();
 //  findMotherShip();
 //    pickup();
 //    deposit();
@@ -329,15 +324,18 @@ void findMotherShip(){
   }
   if (found != true){                     // if the mothership isn't found, 
     turnTo(0.0);
+    delay(250);
     for (int i = 0; i <= 1; i++){         //  go to the next point and do a scan there
       double targetAngle = findAngle(pathX[i], pathY[i]);
       turnTo(targetAngle);
       double distance = findDistance(currentCoord[0], pathX[i], currentCoord[1], pathY[i]);
       int dSteps = findSteps(distance, "distance");
       linear(dSteps);
-      turnTo(curAngle + 120.0);
-      for (int i = 0; i < 16; i++){       // there might be a cleaner way of doing this, but the idea
-                                          // is to do two seperate 120 degree scans, checking every 10 degrees
+      turnTo(0.0);
+      if (i < 1){ turnTo(30.0); }
+      else { turnTo(210); }
+      for (int i = 0; i < 16; i++){       // scan from curAngle+120 to curAngle-120
+                                          
         isgreen = isGreenPresent();
         if( isgreen == true){
           found = true;                   // if we find it, set found to true, and break out of the loop
@@ -350,6 +348,7 @@ void findMotherShip(){
         Serial.println("4");
         break;                            // this may seem redundant, but we have to do this twice since there are 2 for loops
       }
+      turnTo(0.0);
     }
   }
   else{
