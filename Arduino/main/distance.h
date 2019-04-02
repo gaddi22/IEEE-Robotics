@@ -3,6 +3,7 @@
 //initialize IR variables
 int    ir_sensor0 = A1; //center low
 int    ir_sensor1 = A2; //low left side
+int    ir_sensor2 = A4; //rotating front sensor
 float  volts; 
 double cm;
 double lightSensorConversionFactor = .0048828125;
@@ -30,7 +31,7 @@ double lowSensor(){
  double stDev = sqrt(sqDevSum/100.0);
 
  double rv = 100;
- if(stDev < .9){
+ if(stDev < .95){
    rv = meanSample;
  }
 
@@ -38,14 +39,29 @@ double lowSensor(){
 }
 
 int lowLeftSensor(){
-  volts = analogRead(ir_sensor1) * lightSensorConversionFactor;
+  volts = analogRead(ir_sensor2) * lightSensorConversionFactor;
   cm = 13* pow(volts, -1);    //distance in cm
   
   return cm/1;
 }
 
+//rotating sensor
 double highRightSensor(){
-  volts = analogRead(ir_sensor1) * lightSensorConversionFactor;
-  cm = 13* pow(volts, -1);    //distance in cm
-  return cm;
+  double sampleSum = 0;
+  double samples[100];
+  for(int index = 0; index<100; index++){
+    volts = analogRead(ir_sensor2) * lightSensorConversionFactor;
+    cm = 13* pow(volts, -1);    //distance in cm
+    samples[index] = cm;
+    sampleSum += cm;
+  }
+
+  //std Dev of sample
+  double dev = stDev(samples, 100);
+
+  double rv = 100.0;
+  if(dev < .95){
+    rv = sampleSum / 100.0;
+  }
+  return rv;
 }

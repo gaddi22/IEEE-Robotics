@@ -2,10 +2,10 @@
 #include <Arduino.h>
 #include <math.h>             //used for arctan function to get angle to blocks
 #include "movement.h"
+#include "direction.h"
 #include "distance.h"
 #include "arm.h"
 #include "color.h"
-#include "direction.h"
 
 //----------------State Manager Variables---------------
 char   msg            = 0;          //read from pi
@@ -14,8 +14,9 @@ int    accum          = 0;          //number of blocks picked up
 double curAngle       = 0;          //current Degees Robot is facing 
 double currentCoord[] = {3, 3};     //location of robot
 int    blockQty = 0;
-double blockX[] = {3,5,2,7,2,7};    //blocks' Xcoordinates
-double blockY[] = {4,5,1,3,0,6};    //blocks' Ycoordinates
+double blockX[] = {1,5,2,7,2,7};    //blocks' Xcoordinates
+double blockY[] = {6,5,1,3,0,6};    //blocks' Ycoordinates
+double initialDir = 0;              //direction magnetometer says north is
 double forwardDistanceFromArmToBlock = 12.0; //cm, minimum distance to pick up block
 double backwardDistanceFromArmToBlock = 11.0;
 bool   testCondition = true;        //used to test a single iteration
@@ -47,6 +48,8 @@ void setup() {
 
   //----------Magnetometer----------
   mag.begin();
+  initialDir = getHeading();
+  setInitialDir(initialDir);
   
   //----------Serial Setup----------
   Serial.begin(9600);
@@ -54,9 +57,13 @@ void setup() {
 }
 
 void loop() {
-  delay(250);
-  //bool isGreen = isGreenPresent();
-  Serial.println(getHeading());
+  delay(3000);
+  if(testCondition){
+    logVal("Traveling!", "");
+    findPath(blockX[0], blockY[0]);
+    findPath(blockX[1], blockY[1]);
+    //testCondition = false;
+  }
 //  /
 //    pickup();
 //    deposit();
@@ -99,7 +106,7 @@ void loop() {
   }
   */
 }
-/*
+
 //prints value to serial monitor
 void logVal(String msg, double val){
   Serial.println(msg + String(val));
@@ -108,7 +115,7 @@ void logVal(String msg, double val){
 void logVal(String msg, String val){
   Serial.println(msg + val);
 }
-*/
+
 
 //distance: distance to object
 bool checkIfObstacle(double distance){      // these currently call lowSensor, they need to call the High right sensor
@@ -147,6 +154,10 @@ bool equal(double val, double newVal){
   else{ return false; }
 }
 
+bool isNE(int x, int y){
+  return (currentCoord[0] < x && currentCoord[1] < y);
+}
+
 //find angle from current location to coordinate. 0 is north
 double findAngle(int x, int y){
   double delX = (x-currentCoord[0]);  //change in x
@@ -183,27 +194,55 @@ double findDistance(double x1, double x2, double y1, double y2){
 
 //finds path to travel to point (x,y) from currentCoord.
 //currently finds straight line
-void findPath(int x, int y){
-//  logVal("Current x-val: ", currentCoord[0]);
-//  logVal("Current y-val: ", currentCoord[1]);
-//  logVal("Target location: ", coordToString(x, y));
-  double targetAngle = findAngle(x, y);
-  double dAngle   = helper_rotate(curAngle, targetAngle); //change in angle
-  double distance = findDistance(currentCoord[0], x, currentCoord[1], y);
-  //logVal("distance", distance/304.8);
-  int    dSteps   = findSteps(distance, "distance");
-  int    aSteps   = findSteps(dAngle,   "angle"   );
-  
-  double trueDistance = stepsToDistance(dSteps);
-  double trueAngle    = stepsToAngle(aSteps);
+//void findPath(int x, int y){
+//  int targetX = x; int targetY = y;
+//  if(isNE(x, y)){ targetX-=1; targetY-=1; }
+//  double targetAngle = findAngle(targetX, targetY);
+//  logVal("targetAngle", targetAngle);
+//  double dAngle   = helper_rotate(curAngle, targetAngle); //change in angle
+//  double distance = findDistance(currentCoord[0], targetX, currentCoord[1], targetY);
+//  logVal("distance", distance/304.8);
+//  int    dSteps   = findSteps(distance, "distance");
+//  int    aSteps   = findSteps(dAngle,   "angle"   );
+//  
+//  double trueDistance = stepsToDistance(dSteps);
+//  double trueAngle    = stepsToAngle(aSteps);
+//  //run path with true values
+//  //runPath(aSteps, dSteps);   //travels determined distance
+//  while(abs(getHeading() - targetAngle) > .5){
+//    Serial.println("Turning..."); 
+//    turnTo(targetAngle);
+//    updateLocation(0);
+//    logVal("Heading: ", getHeading());
+//  }
+//  linear(dSteps);
+//  updateLocation(trueDistance);
+//  delay(3000);
+//}
 
-//  logVal("trueAngle", trueAngle);
-//  logVal("Steps: ", aSteps);
-  //logVal("trueDistance", trueDistance/304.8);
-  //run path with true values
-  runPath(aSteps, dSteps);   //travels determined distance
-  updateLocation(trueAngle, trueDistance);
-  delay(7000);
+void findPath(int x, int y){
+  double distX = x - currentCoord[0];
+  double distY = y - currentCoord[1];
+  int xSteps = findSteps(distX*304.8, "distance");
+  int ySteps = findSteps(distY*304.8, "distance");
+  logVal("Moving forward", ySteps);
+  //travel y
+  linear(ySteps);
+
+  //travel x
+  double rotateAngle = 90;
+  if(distX < 0){ rotateAngle *= -1; }
+  turnTo(rotateAngle);
+  linear(abs(xSteps));
+
+  //update State
+  int xFlag = 1;  //which direction we are going, pos = right
+  int yFlag = 1;
+  if(distX < 0){ xFlag = -1; }
+  if(distY < 0){ yFlag = -1; }
+  currentCoord[1] += yFlag * stepsToDistance(ySteps);
+  currentCoord[0] += xFlag * stepsToDistance(xSteps);
+  curAngle = getHeading(); 
 }
 
 //receives data from pi and loads it into state variables
@@ -245,14 +284,20 @@ void runPath(int aSteps, int dSteps){
 
 //trueAngle:    angle robot rotated
 //trueDistance: distance robot moved
-void updateLocation(double trueAngle, double trueDistance){
-  curAngle         = curAngle + trueAngle;
-  double rad       = degToRad(trueAngle);           //angle in radians
+void updateLocation(double trueDistance){
+  //curAngle         = curAngle + trueAngle;
+  double newCurAngle = getHeading();
+  double trueAngle   = newCurAngle - curAngle;
+  double rad         = degToRad(curAngle);           //angle in radians
+  curAngle           = newCurAngle;
   //new location, convert distance to block location
-  currentCoord[0] += sin(rad) * trueDistance/304.8;
-  currentCoord[1] += cos(rad) * trueDistance/304.8;
-//  String display = String(currentCoord[0]) + ", " + String(currentCoord[1]); 
-//  logVal("New location: ", display);
+  if(trueDistance > 0){
+    currentCoord[0] += sin(rad) * trueDistance/304.8;
+    currentCoord[1] += cos(rad) * trueDistance/304.8;
+    String display = String(currentCoord[0]) + ", " + String(currentCoord[1]); 
+    logVal("New location: ", display);
+    logVal("New angle: ", curAngle);
+  }
 }
 
 

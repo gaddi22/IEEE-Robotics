@@ -6,6 +6,7 @@
 
 /* Assign a unique ID to this sensor at the same time */ 
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
+double compensation_constant = 0; //initial reading for magnetometer
 
 //arr: array of values to find std dev of
 //qty: size of array/number of indexes to include in result
@@ -47,8 +48,17 @@ double getHeading(){
   }
 
   double dev = stDev(samples, 100);
-  if(dev > .15){ return getHeading(); }
+  if(dev > 1.5){ return getHeading(); }
   else{ //heading
-    return sampleSum/100.0; 
+    double heading = sampleSum/100.0;
+    //Serial.print("compensation_constant: ");
+    //Serial.println(compensation_constant);
+    //heading -= compensation_constant;
+  //  if(heading>180){ heading -= 360; }
+    return heading; 
   }
+}
+
+setInitialDir(double val){
+  compensation_constant = val;
 }
