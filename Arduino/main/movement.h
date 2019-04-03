@@ -203,12 +203,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);       // findSteps function
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(100);
+      delayMicroseconds(50);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(550);
+      delayMicroseconds(600);
     }
     digitalWrite(Dir_FR, LOW);
     digitalWrite(Dir_BR, LOW);   
@@ -222,12 +222,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(100);
+      delayMicroseconds(50);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(550);
+      delayMicroseconds(600);
     }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_BL, HIGH);
@@ -244,12 +244,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);       // findSteps function
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(100);
+      delayMicroseconds(50);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(200);
+      delayMicroseconds(250);
     }
     digitalWrite(Dir_FR, LOW);
     digitalWrite(Dir_BR, LOW);   
@@ -263,12 +263,12 @@ void rotate(int steps)  // callable function for rotation
       digitalWrite(Pulse_FR, HIGH);
       digitalWrite(Pulse_BL, HIGH);
       digitalWrite(Pulse_BR, HIGH);
-      delayMicroseconds(100);
+      delayMicroseconds(50);
       digitalWrite(Pulse_FL, LOW);
       digitalWrite(Pulse_FR, LOW);
       digitalWrite(Pulse_BL, LOW);
       digitalWrite(Pulse_BR, LOW);
-      delayMicroseconds(200);
+      delayMicroseconds(250);
     }
     digitalWrite(Dir_FL, HIGH);
     digitalWrite(Dir_BL, HIGH);

@@ -42,7 +42,7 @@ String classifyColor(int r, int g, int b) {
   int blue[]    = {   0,   0, 255};
   //int grey[]    = { 128, 128, 128};
   int black[]   = {   0,   0,   0};
-  int green[]   = {   0, 184,   0};
+  int green[]   = {   0, 183,   0};
   int white[]   = { 255, 255, 255};
   //int brown[]   = { 101,  67,  33};
   int orange[]  = { 255, 165,   0};

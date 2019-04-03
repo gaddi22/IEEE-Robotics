@@ -42,34 +42,37 @@ void setup() {
 void loop() {
 
 
-  delay(3000);
-  findMotherShip();
+//  delay(3000);
+  
+//  findMotherShip();
+// alignMotherShip();
 //    pickup();
 //    deposit();
   
-  /*
-  delay(1000);
   
+  delay(1000);
+  for( int i = 0; i < 1; i++){
   //testing
   //linear(10);
-  double distance = lowSensor();
-  logVal("Distance: ", distance);
-//  if(distance > 20){
-//    Serial.println("object too far");
-//    rotate(-10);
-//  }else if(distance > distanceFromArmToBlock){
-//    logVal("Object detected!", "");
-//    Serial.println("Moving to object");
-//    double dtt = distance - distanceFromArmToBlock; //distance to travel
-//    int distanceSteps = findSteps(dtt, "distance");
-//    linear(distanceSteps);
-//    updateLocation(0, stepsToDistance(distanceSteps));
-//  }else{
-//    Serial.println("Picking up object");
-//    pickup();
-//    deposit();
-//  }
+    double distance = lowSensor();
+    logVal("Distance: ", distance);
+    bool found = findBlock(0);
+    distance = lowSensor();
   
+    if(distance > distanceFromArmToBlock){
+      logVal("Object detected!", "");
+      Serial.println("Moving to object");
+      double dtt = distance - distanceFromArmToBlock; //distance to travel
+      int distanceSteps = findSteps(dtt, "distance");
+      linear(distanceSteps);
+      updateLocation(0, stepsToDistance(distanceSteps));
+    } 
+    else{
+      Serial.println("Picking up object");
+      pickup();
+      deposit();
+    }
+  }
   /*
   if(root == "pi"){
     receiveData();
@@ -85,7 +88,7 @@ void loop() {
   }
   */
 }
-/*
+
 //prints value to serial monitor
 void logVal(String msg, double val){
   Serial.println(msg + String(val));
@@ -94,7 +97,7 @@ void logVal(String msg, double val){
 void logVal(String msg, String val){
   Serial.println(msg + val);
 }
-*/
+
 
 //distance: distance to object
 bool checkIfObstacle(double distance){      // these currently call lowSensor, they need to call the High right sensor
@@ -178,6 +181,7 @@ double findAngle(int x, int y){
     return angle;
   }
 }
+
 
 
 //blockNum: block we are currently searching for
@@ -311,8 +315,8 @@ void findMotherShip(){
   double pathX[] = {2, 6};
   double pathY[] = {4, 4};    // set points for checking, if we don't find it on the first 360
   bool isgreen = false;                          
-  int steps = findSteps(20.0, "angle");
-  for (int i = 0; i <18; i++){            // do 360 degree check on the starting point.
+  int steps = findSteps(15.0, "angle");
+  for (int i = 0; i <24; i++){            // do 360 degree check on the starting point.
     isgreen = isGreenPresent();
     if( isgreen == true){                 // if green is present in the current direction, break out of the loop
       found = true;
@@ -333,7 +337,7 @@ void findMotherShip(){
       turnTo(0.0);
       if (i < 1){ turnTo(150.0); }
       else { turnTo(-30.0); }
-      for (int i = 0; i < 12; i++){       // scan from curAngle+120 to curAngle-120
+      for (int i = 0; i < 16; i++){       // scan from curAngle+120 to curAngle-120
                                           
         isgreen = isGreenPresent();
         if( isgreen == true){
@@ -355,19 +359,23 @@ void findMotherShip(){
                                           // need to step towards the source of the green light, in increments of our sensor range; 14cm, or 140 mm (doing 130 mm for now)
     double distance = 130.0;
     int dSteps = findSteps(distance, "distance");
-    for (int i = 0; i < 6; i++){
-      delay(150);
-      dtt = lowSensor();
-      if (dtt < 13){
-        break;
-      }
+    int iterations = 0;
+    while (dtt > 14 && iterations < 6){
       linear(dSteps);
-                                       // sensor scan of the lowSensor, and the highSensor   high sensor isn't currently set up, but will be soon(TM)
+      delay(150);
+      dtt = lowSensor();                                 // sensor scan of the lowSensor, and the highSensor   high sensor isn't currently set up, but will be soon(TM)
+      iterations += 1;
     }
-                                       // need to find out if we are pointed at a corner
+  }
+}
+
+void alignMotherShip(){
+    // need to find out if we are pointed at a corner
+    // for aligning the with the mothership
+    double dtt = lowSensor();          // distance to target
     rotateScan(dtt);
     double returnAngle = curAngle;
-    steps = findSteps(30.0, "angle");  // this value might need to be higher
+    int steps = findSteps(30.0, "angle");  // this value might need to be higher
     rotate(steps);
     bool isgreen2 = isGreenPresent();
     turnTo(returnAngle);
@@ -382,7 +390,7 @@ void findMotherShip(){
       double x = 142.5;                                // dist from sensor to edge of wheel
       double theta = asin(x/(sqrt(sq(x)+sq(dist))));   // angle 
       steps = findSteps(theta, "angle");               // steps for rotation
-      dSteps = findSteps(108.24, "distance");          // steps for 1/2 the distance of the mothership
+      int dSteps = findSteps(108.24, "distance");          // steps for 1/2 the distance of the mothership
       if (isgreen1 == true){
         rotate(-steps);                                // CCW rotation
         linear(dSteps); 
@@ -399,9 +407,7 @@ void findMotherShip(){
       rotateScan(dtt);                                 // find orthagonal
       return;
     }
-  }
 }
-
 
 
 
