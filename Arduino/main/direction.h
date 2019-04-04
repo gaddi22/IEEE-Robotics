@@ -53,8 +53,8 @@ double getHeading(){
     double heading = sampleSum/100.0;
     //Serial.print("compensation_constant: ");
     //Serial.println(compensation_constant);
-    //heading -= compensation_constant;
-  //  if(heading>180){ heading -= 360; }
+    heading -= compensation_constant;
+    if(heading>180){ heading -= 360; }
     return heading; 
   }
 }

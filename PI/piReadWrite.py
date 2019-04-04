@@ -63,12 +63,10 @@ if __name__ == '__main__':
     while True:
         if(root.val == 'pi'):
             if(root.blockDataSent == False):
-                time.sleep(4)
                 parsJson(root)
                 sendBlockData(root)
                 root.val = "ard"
             else:
                 pass
-        else:
-            pass
-            #receiveData(root)
+        elif(root.val == 'ard'):
+            receiveData(root)

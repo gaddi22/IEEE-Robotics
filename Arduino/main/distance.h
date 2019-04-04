@@ -4,11 +4,12 @@
 int    ir_sensor0 = A1; //center low
 int    ir_sensor1 = A2; //low left side
 int    ir_sensor2 = A4; //rotating front sensor
+int    pos        =  0; //variable to hold sensor/servo angle
 float  volts; 
 double cm;
 double lightSensorConversionFactor = .0048828125;
 
-//returns distance to an object from bottom sensor, in cm
+//returns distance to an object from bottom, center, sensor, in cm
 double lowSensor(){
   double sampleSum = 0;
   int samples[100];
@@ -46,7 +47,8 @@ int lowLeftSensor(){
 }
 
 //rotating sensor
-double highRightSensor(){
+//returns distance to object
+double blockSensor(){
   double sampleSum = 0;
   double samples[100];
   for(int index = 0; index<100; index++){
@@ -64,4 +66,18 @@ double highRightSensor(){
     rv = sampleSum / 100.0;
   }
   return rv;
+}
+
+//returns angle at which object was found
+double blockSensorSweep(){
+  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    myservo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+    distance = blockSensor();
+    if(distance <= 20){ return pos; }
+  }
+  pos = 90;
+  myservo.write(pos);  //return to center
+  return 360; //nothing found
 }

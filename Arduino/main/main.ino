@@ -9,10 +9,10 @@
 
 //----------------State Manager Variables---------------
 char   msg            = 0;          //read from pi
-String root           = "ard";      //sets arduino to active
+String root           = "pi";      //sets arduino to active
 int    accum          = 0;          //number of blocks picked up
 double curAngle       = 0;          //current Degees Robot is facing 
-double currentCoord[] = {3, 3};     //location of robot
+double currentCoord[] = {3.5, 3.5};     //location of robot
 int    blockQty = 0;
 double blockX[] = {1,5,2,7,2,7};    //blocks' Xcoordinates
 double blockY[] = {6,5,1,3,0,6};    //blocks' Ycoordinates
@@ -43,6 +43,10 @@ void setup() {
   arm.write(inAngle);
   pincer.write(inAngle);
 
+  //IR Sensor Servo
+  Servo myservo; 
+  myservo.attach(12);
+
   //----------Color Senser----------
   tcs.begin();
 
@@ -57,12 +61,18 @@ void setup() {
 }
 
 void loop() {
-  delay(3000);
-  if(testCondition){
-    logVal("Traveling!", "");
-    findPath(blockX[0], blockY[0]);
-    findPath(blockX[1], blockY[1]);
-    //testCondition = false;
+
+  if(root = "pi"){
+    //readBlockData();  //will wait until data received
+    root = "ard";
+  }else if(root = "ard"){
+    delay(3000);
+    if(testCondition){
+      logVal("Traveling!", "");
+      findPath(blockX[1], blockY[1]); //5,5
+      findPath(blockX[0], blockY[0]); //1,6
+      testCondition = false;
+    }
   }
 //  /
 //    pickup();
@@ -158,6 +168,14 @@ bool isNE(int x, int y){
   return (currentCoord[0] < x && currentCoord[1] < y);
 }
 
+bool isNW(int x, int y){
+  return (currentCoord[0] > x && currentCoord[1] < y);
+}
+
+bool isSE(int x, int y){
+  return (currentCoord[0] < x && currentCoord[1] > y);
+}
+
 //find angle from current location to coordinate. 0 is north
 double findAngle(int x, int y){
   double delX = (x-currentCoord[0]);  //change in x
@@ -194,56 +212,41 @@ double findDistance(double x1, double x2, double y1, double y2){
 
 //finds path to travel to point (x,y) from currentCoord.
 //currently finds straight line
-//void findPath(int x, int y){
-//  int targetX = x; int targetY = y;
-//  if(isNE(x, y)){ targetX-=1; targetY-=1; }
-//  double targetAngle = findAngle(targetX, targetY);
-//  logVal("targetAngle", targetAngle);
-//  double dAngle   = helper_rotate(curAngle, targetAngle); //change in angle
-//  double distance = findDistance(currentCoord[0], targetX, currentCoord[1], targetY);
-//  logVal("distance", distance/304.8);
-//  int    dSteps   = findSteps(distance, "distance");
-//  int    aSteps   = findSteps(dAngle,   "angle"   );
-//  
-//  double trueDistance = stepsToDistance(dSteps);
-//  double trueAngle    = stepsToAngle(aSteps);
-//  //run path with true values
-//  //runPath(aSteps, dSteps);   //travels determined distance
-//  while(abs(getHeading() - targetAngle) > .5){
-//    Serial.println("Turning..."); 
-//    turnTo(targetAngle);
-//    updateLocation(0);
-//    logVal("Heading: ", getHeading());
-//  }
-//  linear(dSteps);
-//  updateLocation(trueDistance);
-//  delay(3000);
-//}
-
 void findPath(int x, int y){
-  double distX = x - currentCoord[0];
-  double distY = y - currentCoord[1];
-  int xSteps = findSteps(distX*304.8, "distance");
-  int ySteps = findSteps(distY*304.8, "distance");
-  logVal("Moving forward", ySteps);
-  //travel y
-  linear(ySteps);
-
-  //travel x
-  double rotateAngle = 90;
-  if(distX < 0){ rotateAngle *= -1; }
-  turnTo(rotateAngle);
-  linear(abs(xSteps));
-
-  //update State
-  int xFlag = 1;  //which direction we are going, pos = right
-  int yFlag = 1;
-  if(distX < 0){ xFlag = -1; }
-  if(distY < 0){ yFlag = -1; }
-  currentCoord[1] += yFlag * stepsToDistance(ySteps);
-  currentCoord[0] += xFlag * stepsToDistance(xSteps);
-  curAngle = getHeading(); 
+  //get destination
+  int targetX = x; int targetY = y;
+  if(isNE(x, y)){ targetX-=1; targetY-=1; }
+  else if(isNW(x, y)){ targetY-=1; }
+  else if(isSE(x, y)){ targetX-=1; targetY-=1; }
+  
+  //find how far to move, and angle
+  Serial.print("Destionation: ");
+  Serial.print(x);
+  Serial.print(", ");
+  Serial.println(y);
+  double targetAngle = findAngle(targetX, targetY);
+  logVal("targetAngle", targetAngle);
+  double dAngle   = helper_rotate(curAngle, targetAngle); //change in angle
+  double distance = findDistance(currentCoord[0], targetX, currentCoord[1], targetY);
+  logVal("distance", distance/304.8);
+  int    dSteps   = findSteps(distance, "distance");
+  int    aSteps   = findSteps(dAngle,   "angle"   );
+  
+  double trueDistance = stepsToDistance(dSteps);
+  double trueAngle    = stepsToAngle(aSteps);
+  
+  //move
+  while(abs(getHeading() - targetAngle) > .5){
+    Serial.println("Turning..."); 
+    turnTo(targetAngle);
+    updateLocation(0);
+    logVal("Heading: ", getHeading());
+  }
+  linear(dSteps);
+  updateLocation(trueDistance);
+  delay(3000);
 }
+
 
 //receives data from pi and loads it into state variables
 void receiveBlockData(){
@@ -300,82 +303,38 @@ void updateLocation(double trueDistance){
   }
 }
 
-
-//blockNum: block we are currently searching for
-//loc:      location of block currently being searched for
-bool findBlock(int blockNum){
-  //values returned
-  int distanceToBlock = 0;
-  int angleToBlock    = 0;
-
-  //Values to solve problem
+//travels forward through sq. returns angle in degrees to block if found
+//returns 360 if nothing found
+double findBlock(){
   bool found = false;
-  int  loc[] =  { blockX[blockNum], blockY[blockNum] };
-  double angle = findAngle(loc[0], loc[1]); 
-  double angleToTurn = -90;        //left of right
-  double distanceToTravel = 1;      //1 foot
-  int    directionClassifier = 1;  //NE or not? 1 means not NE
-  double distance = 0;  //distance travelled
-  if (angle > 0 && angle < 90){
-    directionClassifier = -1;
+  double distanceTravelled = 0;
+  double angle = blockSensorSweep();
+  if(angle < 360){
+    found = true;
   }
+  //travel forward scanning for block
+  while(!found && distanceTravelled < 1.2){
+    int dSteps = findSteps(40); //travel 4 cm
+    double trueDistance = stepsToDistance(dSteps);
+    linear(dSteps);
+    distanceTravelled += trueDistance;
+    angle = blockSensorSweep();
+    if(angle < 360){ found = true; }
+  }
+  updateLocation(distanceTravelled);
+  return angle;
+}
 
-  angleToTurn *= directionClassifier;
-
-  //---------------1st Pass---------------
-  turnTo(angleToTurn); //turns until it reaches angleToTurn
-  double lowD = lowSensor(); 
-  found = lowD < 14;
-  double newAngle = angleToTurn;
-  while ( newAngle > -180 && !found){
-    //Serial.println("1");
-    int steps = findSteps(1, "angle");
-    rotate(-steps);
-    double angleRotated = stepsToAngle(steps);
-    newAngle -= angleRotated;
-    lowD = lowSensor(); 
-    found = lowD < 14;
+//realigns robot to 0 degrees. Fixing errors in rotation accumulated over time
+void realign(){
+  turnTo(0);
+  updateLocation(0);
+  //find difference from 0 degrees. Rotate until 0 degrees reached
+  while(abs(curAngle) > 0.35){ 
+    double aSteps = findSteps(-curAngle);
+    rotate(aSteps);
+    updateLocation(0);
   }
-  
-
-  if(!found){//---------------2nd Pass---------------
-    turnTo(angleToTurn);
-    while(distance < distanceToTravel && !found){
-      Serial.println("2");
-      linear(3); //move 3 steps forwards
-      //update distance travelled
-      //found = lowLeftSensor < 20;
-    }
-  }else{ 
-    angleToBlock    = curAngle;    //in deg
-    //distanceToBlock = lowSensor(); //in cm
-  }
-  
-  if(!found){ //---------------3rd Pass---------------
-    Serial.println("3");
-    linear(-distance);
-    distance = 0;
-    turnTo(-180);
-    while(distance < distanceToTravel && !found){
-      linear(3); //move 3 steps forwards
-      //update distance travelled
-      //found = lowRightSensor() < 20;
-      if(found){
-        angleToBlock = -90;
-      //  distanceToBlock = lowRightSensor();
-      }
-    }
-  }else{
-    angleToBlock    = -180;    //in deg
-    //distanceToBlock = lowLeftSensor(); //in cm
-  }
-  if(found){
-   Serial.println("Found"); 
-  }else{
-    Serial.println("Not Found"); 
-    return 0; //false, not found
-  }
-  return 1;
 }
 
 //gets data from raspberry pi
