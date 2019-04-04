@@ -6,6 +6,7 @@
 #include "arm.h"
 #include "color.h"
 
+int LED = 37;
 
 void setup() {
   // put your setup code here, to run once:
@@ -23,11 +24,18 @@ void setup() {
   digitalWrite(Dir_BL, HIGH);
   digitalWrite(Dir_BR, LOW);
   
+  //--------- LED setup-------
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, LOW);
+  
   //----------Arm Setup----------
   arm.attach(9);  // attaches the servo on pin 9 to the servo object arm
   pincer.attach(10);  // attaches the servo on pin 10 to the servo object pincer
   arm.write(inAngle);
   pincer.write(inAngle);
+
+  //----------Sensor Setup----------
+  sensor.attach(12);
 
   //----------Color Senser----------
   tcs.begin();
@@ -51,6 +59,10 @@ void loop() {
   
   
   delay(1000);
+  int currentAngle = sensor.read();
+  Serial.println(currentAngle);
+  sensor.write(currentAngle + 2);
+  /*
   for( int i = 0; i < 1; i++){
   //testing
   //linear(10);
@@ -86,6 +98,8 @@ void loop() {
     //findPath(blockX[2], blockY[2]);
     //sendData(accum++);
   }
+  
+  digitalWrite(LED, HIGH);
   */
 }
 
@@ -273,7 +287,7 @@ double findDistance(double x1, double x2, double y1, double y2){
 }
 
 // funtion to rotate up to 180 degrees (90 CCW, then 90 Cw), and find the lowest distance from the lowSensor
-// also takes in optional boolean for mothership,and optional double for the change in angle, these default to false & -1 respectively
+// also takes in optional double for the change in angle, this defaults to false & -1 respectively
 void rotateScan(double distance, double delAngle = -1){
   double lowDistAngle;
   double lowDist = distance;
@@ -309,7 +323,6 @@ void rotateScan(double distance, double delAngle = -1){
 
 // function to find and store mothership data.
 void findMotherShip(){
-  Serial.println("0");
   bool found = false;
 //  double motherShipAngle, motherShipX, motherShipY;
   double pathX[] = {2, 6};
@@ -320,7 +333,6 @@ void findMotherShip(){
     isgreen = isGreenPresent();
     if( isgreen == true){                 // if green is present in the current direction, break out of the loop
       found = true;
-      Serial.println("1");
       break;
     }
     rotate(steps);                        // rotate 10 degrees
@@ -342,13 +354,11 @@ void findMotherShip(){
         isgreen = isGreenPresent();
         if( isgreen == true){
           found = true;                   // if we find it, set found to true, and break out of the loop
-          Serial.println("2");
           break;
         }
         rotate(steps);                    // first one is CCW
       }
       if( found == true){                 // if we found the mothership, break out of the loop
-        Serial.println("4");
         break;                            // this may seem redundant, but we have to do this twice since there are 2 for loops
       }
       turnTo(0.0);
@@ -363,7 +373,7 @@ void findMotherShip(){
     while (dtt > 14 && iterations < 6){
       linear(dSteps);
       delay(150);
-      dtt = lowSensor();                                 // sensor scan of the lowSensor, and the highSensor   high sensor isn't currently set up, but will be soon(TM)
+      dtt = lowSensor();                   // sensor scan of the lowSensor, and the highSensor   high sensor isn't currently set up, but will be soon(TM)
       iterations += 1;
     }
   }
@@ -405,6 +415,10 @@ void alignMotherShip(){
       }
       dtt = lowSensor();                               // take another measurement
       rotateScan(dtt);                                 // find orthagonal
+      dtt = lowSensor();
+      motherAngle = curAngle;
+      motherX = currentCoord[0] + ((.488845)*sin(curAngle)) + ((.30208)*sin(curAngle+90));
+      motherY = currentCoord[1] + ((.488845)*sin(curAngle)) + ((.30208)*sin(curAngle+90));
       return;
     }
 }
