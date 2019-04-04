@@ -1,6 +1,7 @@
 //Used to find distance using IR sensors from the robot to an object
 
 //initialize IR variables
+Servo myservo; 
 int    ir_sensor0 = A1; //center low
 int    ir_sensor1 = A2; //low left side
 int    ir_sensor2 = A4; //rotating front sensor
@@ -74,7 +75,7 @@ double blockSensorSweep(){
     // in steps of 1 degree
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     delay(15);                       // waits 15ms for the servo to reach the position
-    distance = blockSensor();
+    double distance = blockSensor();
     if(distance <= 20){ return pos; }
   }
   pos = 90;

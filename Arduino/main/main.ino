@@ -44,7 +44,6 @@ void setup() {
   pincer.write(inAngle);
 
   //IR Sensor Servo
-  Servo myservo; 
   myservo.attach(12);
 
   //----------Color Senser----------
@@ -128,26 +127,26 @@ void logVal(String msg, String val){
 
 
 //distance: distance to object
-bool checkIfObstacle(double distance){      // these currently call lowSensor, they need to call the High right sensor
-  double a, b, c, theta;
-  a = distance;
-  b = 8.211;
-  c = sqrt(sq(a)+sq(b));
-  theta = asin(b/c);
-  int steps = findSteps(-theta, "angle");
-  rotate(steps);
-  double dist = highRightSensor();
-  if (dist <= 30){
-    for (int i = 0; i < 19; i++){         // might not need this loop at all
-      dist = dist + highRightSensor();  
-    }
-    dist = dist/20;
-    return true;
-  }
-  else{
-    return false;
-  }
-}
+//bool checkIfObstacle(double distance){      // these currently call lowSensor, they need to call the High right sensor
+//  double a, b, c, theta;
+//  a = distance;
+//  b = 8.211;
+//  c = sqrt(sq(a)+sq(b));
+//  theta = asin(b/c);
+//  int steps = findSteps(-theta, "angle");
+//  rotate(steps);
+//  double dist = highRightSensor();
+//  if (dist <= 30){
+//    for (int i = 0; i < 19; i++){         // might not need this loop at all
+//      dist = dist + highRightSensor();  
+//    }
+//    dist = dist/20;
+//    return true;
+//  }
+//  else{
+//    return false;
+//  }
+//}
 
 
 String coordToString(int x, int y){
@@ -212,6 +211,7 @@ double findDistance(double x1, double x2, double y1, double y2){
 
 //finds path to travel to point (x,y) from currentCoord.
 //currently finds straight line
+//goes to corner of sq
 void findPath(int x, int y){
   //get destination
   int targetX = x; int targetY = y;
@@ -314,7 +314,7 @@ double findBlock(){
   }
   //travel forward scanning for block
   while(!found && distanceTravelled < 1.2){
-    int dSteps = findSteps(40); //travel 4 cm
+    int dSteps = findSteps(40, "distance"); //travel 4 cm
     double trueDistance = stepsToDistance(dSteps);
     linear(dSteps);
     distanceTravelled += trueDistance;
@@ -331,10 +331,27 @@ void realign(){
   updateLocation(0);
   //find difference from 0 degrees. Rotate until 0 degrees reached
   while(abs(curAngle) > 0.35){ 
-    double aSteps = findSteps(-curAngle);
+    double aSteps = findSteps(-curAngle, "angle");
     rotate(aSteps);
     updateLocation(0);
   }
+}
+
+void returnToCenter(){
+  findPath(4,4);
+  if(equal(currentCoord[0], 3)){
+    if(equal(currentCoord[1], 3)){
+      turnTo(45);
+    }else{ turnTo(135); }
+  }else if(equal(currentCoord[0], 4)){
+    if(equal(currentCoord[1], 3)){
+      turnTo(-45);
+    }else{ turnTo(-135); }
+  }
+  int dSteps = findSteps(17.96, "distance");     //travel to center of square
+  double trueDistance = stepsToDistance(dSteps);
+  linear(dSteps);
+  updateLocation(trueDistance);
 }
 
 //gets data from raspberry pi
