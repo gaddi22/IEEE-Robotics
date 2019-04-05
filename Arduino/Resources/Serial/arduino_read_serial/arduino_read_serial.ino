@@ -12,6 +12,7 @@ void setup() {
 void loop() {
   while(testCondition){
     delay(2000);
+    Serial.println(1);
     
     receiveBlockData();
     Serial.print("Size: ");
