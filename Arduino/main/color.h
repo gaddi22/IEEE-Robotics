@@ -132,7 +132,12 @@ String colorSense() {
   r *= 256; g *= 256; b *= 256;
 
 //  /
-  
+  Serial.print("Colors: ");
+  Serial.print(r);
+  Serial.print(" , ");
+  Serial.print(g);
+  Serial.print(" , ");
+  Serial.println(b);
   //TESTING
   return classifyColor( (int)r, (int)g, (int)b );
 }
