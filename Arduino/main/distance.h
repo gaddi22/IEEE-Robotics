@@ -2,9 +2,9 @@
 
 //initialize IR variables
 Servo myservo; 
-int    ir_sensor0 = A1; //center low
-int    ir_sensor1 = A2; //low left side
-int    ir_sensor2 = A4; //rotating front sensor
+int    ir_sensor0 = A2; //center low
+//int    ir_sensor1 = A1; //low left side
+int    ir_sensor2 = A1; //rotating front sensor
 int    pos        =  0; //variable to hold sensor/servo angle
 float  volts; 
 double cm;
@@ -71,12 +71,22 @@ double blockSensor(){
 
 //returns angle at which object was found
 double blockSensorSweep(){
+  myservo.write(90);
   for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
     // in steps of 1 degree
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     delay(15);                       // waits 15ms for the servo to reach the position
     double distance = blockSensor();
-    if(distance <= 20){ return pos; }
+    if(distance <= 16.0){ 
+      distance = blockSensor();
+      if(distance <= 16.0){ 
+        pos += 1;
+        myservo.write(pos);
+        delay(15);
+        distance = blockSensor();
+          if (distance < 16.0){ return pos; }   // doublecheck to make sure that something is there.
+      }
+    }
   }
   pos = 90;
   myservo.write(pos);  //return to center
